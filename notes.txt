@@ -1,0 +1,2 @@
+1. the env is exposed in the Pipeline
+2. there are no fallback variables in the docker-compose

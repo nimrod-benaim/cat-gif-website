@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:5000"  # Use the PORT environment variable from .env for Flask app
+      - "${PORT:-5000}:5000"  # Use the PORT environment variable from .env for Flask app
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
