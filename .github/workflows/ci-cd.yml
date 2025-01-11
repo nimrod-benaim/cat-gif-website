@@ -74,7 +74,7 @@ jobs:
           echo "Stage: Test Application with curl"
           docker-compose up -d
           sleep 10  # Allow time for the app to start
-          curl -f http://localhost:5000 || (echo "Curl test failed!" && exit 1)
+          curl -f http://localhost:5000 && echo "Curl test worked!!!!!!!!!!!" || (echo "Curl test failed!" && exit 1)
           docker-compose down
 
       # Step 7: Push the Docker image to DockerHub
