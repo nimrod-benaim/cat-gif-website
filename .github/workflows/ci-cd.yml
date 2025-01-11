@@ -38,7 +38,7 @@ jobs:
           echo "Stage: Lint and Test"
           # Run linters or tests here if you have them
           echo "No tests implemented"  # Replace with actual test commands if any
-        # Replace with actual test commands if any
+      # Replace with actual test commands if any  
 
   deploy:
     name: Deploy to Docker Compose
