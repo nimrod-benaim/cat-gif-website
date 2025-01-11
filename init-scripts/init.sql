@@ -1,6 +1,6 @@
 -- Use the target database
-CREATE DATABASE IF NOT EXISTS catnip_db;
-USE catnip_db;
+CREATE DATABASE IF NOT EXISTS catgif_db;
+USE catgif_db;
 
 -- Create the images table
 CREATE TABLE IF NOT EXISTS images (

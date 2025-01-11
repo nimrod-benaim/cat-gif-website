@@ -1,6 +1,6 @@
 services:
-  catnip:
-    image: nimrod1/cat_gif_site:ver-1.0
+  catgif:
+    image: nimrod1/cat_gif_site_new:ver-2.0
     build:
       context: .
       dockerfile: Dockerfile
