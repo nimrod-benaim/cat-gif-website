@@ -1,0 +1,34 @@
+services:
+  catnip:
+    image: nimrod1/cat_gif_site:ver-1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:5000"  # Use the PORT environment variable from .env for Flask app
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      PORT: ${PORT}  # Pass the PORT variable to the container
+    depends_on:
+      - mysql
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3307:3306"  # Change the host port to 3307 for MySQL (binds to 3307 on the host, 3306 inside the container)
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+volumes:
+  db_data:
