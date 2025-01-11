@@ -1,3 +1,5 @@
 1. the env is exposed in the Pipeline
 2. there are no fallback variables in the docker-compose
-3. in the cicd Step 4: Lint and test the code is empty
+3. in the cicd Lint and test the code is empty
+4. need to add steps in the cicd
+5. need to add echo in cicd printing the step into the log
