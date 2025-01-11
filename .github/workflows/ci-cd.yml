@@ -87,6 +87,7 @@ jobs:
         run: |
           docker-compose down
           docker-compose up -d
+          
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
