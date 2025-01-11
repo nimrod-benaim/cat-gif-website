@@ -53,6 +53,18 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set Environment Variables
+        run: echo "Setting environment variables"
+        env:
+          PORT: 5000
+          DATABASE_HOST: mysql
+          DATABASE_PORT: 3306
+          DATABASE_USER: catgif_user
+          DATABASE_PASSWORD: catgif_password
+          DATABASE_NAME: catgif_db
+          MYSQL_ROOT_PASSWORD: yourpassword
+          MYSQL_DATABASE: catgif_db
+
       - name: Build and Push Docker Image
         run: |
           docker-compose build
