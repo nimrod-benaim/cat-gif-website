@@ -160,6 +160,8 @@ jobs:
           echo "Stage: Install Docker and Docker Compose on EC2"
           ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.create_ec2.outputs.public_ip }} << 'EOF'
             set -e
+            mkdir -p ~/app
+            chmod 755 ~/app
             sudo yum update -y
             sudo yum install -y docker
             sudo systemctl start docker
