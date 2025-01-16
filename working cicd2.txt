@@ -1,0 +1,168 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint and Test
+        run: |
+          # Run linters or tests if you have them
+          echo "No tests implemented"  # Replace this with actual test commands if any
+
+  test:
+    name: Deploy to Docker Compose
+    runs-on: ubuntu-latest
+    needs: build
+    env:  # Environment variables set globally for the deploy job
+      PORT: 5000
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USER: catgif_user
+      DATABASE_PASSWORD: catgif_password
+      DATABASE_NAME: catgif_db
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: catgif_db
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 5: Build the Docker image
+      - name: Build and Push Docker Image
+        run: |
+          echo "Stage: Build Docker Image"
+          docker-compose build
+
+      # Step 6: Run a curl test on the built image
+      - name: Test Application with curl
+        run: |
+          echo "Stage: Test Application with curl"
+          docker-compose up -d
+          sleep 10  # Allow time for the app to start
+          curl -f http://localhost:5000 && echo "Curl test worked!!!!!!!!!!!" || (echo "Curl test failed!" && exit 1)
+          docker-compose down
+
+      # Step 7: Push the Docker image to DockerHub
+      - name: Push Docker Image
+        run: |
+          echo "Stage: Push Docker Image"
+          docker-compose push 
+
+      - name: Deploy Application
+        run: |
+          docker-compose down
+          docker-compose up -d
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create EC2 Instance
+        run: |
+          echo "Stage: Create EC2 Instance"
+          # Create EC2 instance
+          INSTANCE_ID=$(aws ec2 run-instances \
+            --image-id ami-0454e52560c7f5c55 \                                    
+            --count 1 \
+            --instance-type t2.micro \
+            --key-name ${{ secrets.KEY_PAIR_NAME }} \
+            --security-group-ids sg-0f0d3407472ac8219 \                             
+            --subnet-id subnet-078a93271a482bc62 \                                     
+            --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=catgif-app-instance}]" \
+            --query 'Instances[0].InstanceId' --output text)
+
+          echo "EC2 Instance Created with ID: $INSTANCE_ID"
+
+          # Wait for EC2 instance to be running
+          aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+          echo "EC2 Instance is now running."
+
+          # Get the public IP address of the instance
+          PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
+            --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+          echo "Public IP: $PUBLIC_IP"
+
+      - name: Install Docker and Docker Compose on EC2
+        run: |
+          echo "Stage: Install Docker and Docker Compose on EC2"
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
+            ec2-user@$PUBLIC_IP << 'EOF'
+            set -e
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            echo "Docker and Docker Compose installed."
+          EOF
+
+      - name: Deploy Application on EC2
+        run: |
+          echo "Stage: Deploy Application on EC2"
+          # Deploy to the newly created EC2 instance
+          scp -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
+            docker-compose.yml \
+            ec2-user@$PUBLIC_IP:~/app/
+
+          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
+            ec2-user@$PUBLIC_IP << 'EOF'
+            set -e
+            cd ~/app
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
+            echo "Deployment complete!"
+          EOF
