@@ -28,14 +28,13 @@ jobs:
 
       - name: Lint and Test
         run: |
-          # Run linters or tests if you have them
           echo "No tests implemented"  # Replace this with actual test commands if any
 
   test:
     name: Deploy to Docker Compose
     runs-on: ubuntu-latest
     needs: build
-    env:  # Environment variables set globally for the deploy job
+    env:
       PORT: 5000
       DATABASE_HOST: mysql
       DATABASE_PORT: 3306
@@ -71,14 +70,14 @@ jobs:
         run: |
           echo "Stage: Test Application with curl"
           docker-compose up -d
-          sleep 10  # Allow time for the app to start
+          sleep 10
           curl -f http://localhost:5000 && echo "Curl test worked!" || (echo "Curl test failed!" && exit 1)
           docker-compose down
 
       - name: Push Docker Image
         run: |
           echo "Stage: Push Docker Image"
-          docker-compose push
+          docker-compose push 
 
       - name: Deploy Application
         run: |
@@ -107,6 +106,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Create EC2 Instance
+        id: create_ec2
         run: |
           echo "Stage: Create EC2 Instance"
           IMAGE_ID="ami-0454e52560c7f5c55"
@@ -139,6 +139,7 @@ jobs:
           fi
 
           echo "Public IP: $PUBLIC_IP"
+          echo "::set-output name=public_ip::$PUBLIC_IP"
 
       - name: Save SSH Key
         run: |
@@ -148,7 +149,7 @@ jobs:
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
-          ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@$PUBLIC_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.create_ec2.outputs.public_ip }} << 'EOF'
             set -e
             sudo yum update -y
             sudo yum install -y docker
@@ -162,8 +163,9 @@ jobs:
       - name: Deploy Application on EC2
         run: |
           echo "Stage: Deploy Application on EC2"
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yml ec2-user@$PUBLIC_IP:~/app/
-          ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@$PUBLIC_IP << 'EOF'
+          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yml ec2-user@${{ steps.create_ec2.outputs.public_ip }}:~/app/
+
+          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.create_ec2.outputs.public_ip }} << 'EOF'
             set -e
             cd ~/app
             docker-compose pull
