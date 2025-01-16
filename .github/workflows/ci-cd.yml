@@ -62,26 +62,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 5: Build the Docker image
       - name: Build and Push Docker Image
         run: |
           echo "Stage: Build Docker Image"
           docker-compose build
 
-      # Step 6: Run a curl test on the built image
       - name: Test Application with curl
         run: |
           echo "Stage: Test Application with curl"
           docker-compose up -d
           sleep 10  # Allow time for the app to start
-          curl -f http://localhost:5000 && echo "Curl test worked!!!!!!!!!!!" || (echo "Curl test failed!" && exit 1)
+          curl -f http://localhost:5000 && echo "Curl test worked!" || (echo "Curl test failed!" && exit 1)
           docker-compose down
 
-      # Step 7: Push the Docker image to DockerHub
       - name: Push Docker Image
         run: |
           echo "Stage: Push Docker Image"
-          docker-compose push 
+          docker-compose push
 
       - name: Deploy Application
         run: |
@@ -112,15 +109,12 @@ jobs:
       - name: Create EC2 Instance
         run: |
           echo "Stage: Create EC2 Instance"
-    
-          # Define parameters for the EC2 instance
-          IMAGE_ID="ami-0454e52560c7f5c55"  # Replace with your valid AMI ID
+          IMAGE_ID="ami-0454e52560c7f5c55"
           INSTANCE_TYPE="t2.micro"
-          SECURITY_GROUP_ID="sg-0f0d3407472ac8219"  # Replace with your security group ID
-          SUBNET_ID="subnet-078a93271a482bc62"  # Replace with your subnet ID
+          SECURITY_GROUP_ID="sg-0f0d3407472ac8219"
+          SUBNET_ID="subnet-078a93271a482bc62"
           KEY_NAME="${{ secrets.KEY_PAIR_NAME }}"
 
-          # Create EC2 instance
           INSTANCE_ID=$(aws ec2 run-instances \
             --image-id $IMAGE_ID \
             --count 1 \
@@ -130,23 +124,31 @@ jobs:
             --subnet-id $SUBNET_ID \
             --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=catgif-app-instance}]" \
             --query 'Instances[0].InstanceId' --output text)
-    
+
           echo "EC2 Instance Created with ID: $INSTANCE_ID"
 
-          # Wait for EC2 instance to be running
           aws ec2 wait instance-running --instance-ids $INSTANCE_ID
           echo "EC2 Instance is now running."
 
-          # Get the public IP address of the instance
           PUBLIC_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID \
             --query 'Reservations[0].Instances[0].PublicIpAddress' --output text)
+
+          if [ -z "$PUBLIC_IP" ]; then
+            echo "Error: Public IP address not found."
+            exit 1
+          fi
+
           echo "Public IP: $PUBLIC_IP"
+
+      - name: Save SSH Key
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
+          chmod 600 ec2-key.pem
 
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
-          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
-            ec2-user@$PUBLIC_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@$PUBLIC_IP << 'EOF'
             set -e
             sudo yum update -y
             sudo yum install -y docker
@@ -160,13 +162,8 @@ jobs:
       - name: Deploy Application on EC2
         run: |
           echo "Stage: Deploy Application on EC2"
-          # Deploy to the newly created EC2 instance
-          scp -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
-            docker-compose.yml \
-            ec2-user@$PUBLIC_IP:~/app/
-
-          ssh -o StrictHostKeyChecking=no -i "${{ secrets.EC2_KEY }}" \
-            ec2-user@$PUBLIC_IP << 'EOF'
+          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yml ec2-user@$PUBLIC_IP:~/app/
+          ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@$PUBLIC_IP << 'EOF'
             set -e
             cd ~/app
             docker-compose pull
