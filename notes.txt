@@ -4,4 +4,5 @@
 4. need to add steps in the cicd
 5. need to add echo in cicd printing the step into the log
 6. nned to make the test and build stages seperte 
-7. need to remove ports in the yaml in the mysql part  
+7. need to remove ports in the D-C.yaml in the mysql part. avici said we dont need it and sould remove it 
+8. in the cicd i have a temporary fix with the "Authorize GitHub Actions Runner IP". i need to use a aws ssm to fix this.

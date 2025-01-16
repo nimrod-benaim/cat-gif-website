@@ -172,7 +172,7 @@ jobs:
       - name: Deploy Application on EC2
         run: |
           echo "Stage: Deploy Application on EC2"
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yml ec2-user@${{ steps.create_ec2.outputs.public_ip }}:~/app/
+          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yaml ec2-user@${{ steps.create_ec2.outputs.public_ip }}:~/app/
 
           ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.create_ec2.outputs.public_ip }} << 'EOF'
             set -e
