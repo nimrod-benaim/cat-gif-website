@@ -146,6 +146,15 @@ jobs:
           echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
           chmod 600 ec2-key.pem
 
+      - name: Authorize GitHub Actions Runner IP
+        run: |
+          RUNNER_IP=$(curl -s http://checkip.amazonaws.com)
+          aws ec2 authorize-security-group-ingress \
+            --group-id sg-0f0d3407472ac8219 \
+            --protocol tcp \
+            --port 22 \
+            --cidr "$RUNNER_IP/32"
+
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
