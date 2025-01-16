@@ -114,12 +114,12 @@ jobs:
           echo "Stage: Create EC2 Instance"
           # Create EC2 instance (replace instance type, AMI ID, and other parameters)
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-0454e52560c7f5c55 \ # Replace with valid AMI ID                                       הנה#
+            --image-id ami-0454e52560c7f5c55 \                                    
             --count 1 \
             --instance-type t2.micro \
-            --key-name ${{ secrets.KEY_PAIR_NAME }} \#
-            --security-group-ids sg-0f0d3407472ac8219 \ # Replace with valid security group                               #הנה#
-            --subnet-id subnet-078a93271a482bc62 \ # Replace with valid subnet                                            #הנה#
+            --key-name ${{ secrets.KEY_PAIR_NAME }} \
+            --security-group-ids sg-0f0d3407472ac8219 \                             
+            --subnet-id subnet-078a93271a482bc62 \                                     
             --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=catgif-app-instance}]" \
             --query 'Instances[0].InstanceId' --output text)
 
