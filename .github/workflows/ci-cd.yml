@@ -112,17 +112,25 @@ jobs:
       - name: Create EC2 Instance
         run: |
           echo "Stage: Create EC2 Instance"
-          # Create EC2 instance (replace instance type, AMI ID, and other parameters)
+    
+          # Define parameters for the EC2 instance
+          IMAGE_ID="ami-0454e52560c7f5c55"  # Replace with your valid AMI ID
+          INSTANCE_TYPE="t2.micro"
+          SECURITY_GROUP_ID="sg-0f0d3407472ac8219"  # Replace with your security group ID
+          SUBNET_ID="subnet-078a93271a482bc62"  # Replace with your subnet ID
+          KEY_NAME="${{ secrets.KEY_PAIR_NAME }}"
+
+          # Create EC2 instance
           INSTANCE_ID=$(aws ec2 run-instances \
-            --image-id ami-0454e52560c7f5c55 \                                    
+            --image-id $IMAGE_ID \
             --count 1 \
-            --instance-type t2.micro \
-            --key-name ${{ secrets.KEY_PAIR_NAME }} \
-            --security-group-ids sg-0f0d3407472ac8219 \                             
-            --subnet-id subnet-078a93271a482bc62 \ # Replace with valid subnet                                           
+            --instance-type $INSTANCE_TYPE \
+            --key-name $KEY_NAME \
+            --security-group-ids $SECURITY_GROUP_ID \
+            --subnet-id $SUBNET_ID \
             --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=catgif-app-instance}]" \
             --query 'Instances[0].InstanceId' --output text)
-
+    
           echo "EC2 Instance Created with ID: $INSTANCE_ID"
 
           # Wait for EC2 instance to be running
