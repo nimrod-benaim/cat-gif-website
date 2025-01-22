@@ -57,7 +57,7 @@ resource "aws_instance" "docker_host" {
 
               # Clone your project repository
               sudo yum install -y git
-              git clone https://github.com/your-repo/cat-gif-website.git /home/ec2-user/cat-gif-website
+              git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
 
               # Change directory and run Docker Compose
               cd /home/ec2-user/cat-gif-website
