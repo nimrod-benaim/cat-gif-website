@@ -14,13 +14,11 @@ resource "aws_security_group" "docker_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allow HTTP from anywhere
   }
-
-  # Allow MySQL
-  ingress {
-    from_port   = 3307
-    to_port     = 3307
+   ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow MySQL from anywhere
+    cidr_blocks = ["0.0.0.0/0"] # ssh
   }
 
   # Egress rules (allow all outbound traffic)
@@ -49,6 +47,7 @@ resource "aws_instance" "docker_host" {
               sudo yum update -y
               sudo amazon-linux-extras enable docker
               sudo yum install -y docker
+              sudo yum install -y libxcrypt-compat
               sudo service docker start
               sudo usermod -a -G docker ec2-user
               curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -61,7 +60,7 @@ resource "aws_instance" "docker_host" {
 
               # Change directory and run Docker Compose
               cd /home/ec2-user/cat-gif-website
-              docker-compose up -d
+              docker-compose up -d --no-build
               EOF
 
   tags = {

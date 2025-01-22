@@ -15,7 +15,7 @@ db_config = {
     "user": os.environ.get("DATABASE_USER", "root"),
     "password": os.environ.get("DATABASE_PASSWORD", ""),
     "database": os.environ.get("DATABASE_NAME", "catgif_db"),
-    "port": int(os.environ.get("DATABASE_PORT", 3306)),  # Add port to db_config
+    "port": os.environ.get("DATABASE_PORT", 3306),  # Add port to db_config
 }
 
 def get_db_connection():
