@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  DATABASE_HOST: mysql
+  DATABASE_PORT: "3306"
+  DATABASE_NAME: catgif_db
+  PORT: "5000"

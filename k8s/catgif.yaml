@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catgif
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catgif
+  template:
+    metadata:
+      labels:
+        app: catgif
+    spec:
+      containers:
+      - name: catgif
+        image: nimrod1/cat_gif_site_new:ver-2.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_PORT
+        - name: DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DATABASE_NAME
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: PORT
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_USER
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_PASSWORD
