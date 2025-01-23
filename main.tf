@@ -2,8 +2,22 @@ provider "aws" {
   region = "us-east-1" # Adjust to your desired AWS region
 }
 
+# Check if the security group already exists
+data "aws_security_group" "existing_sg" {
+  filter {
+    name   = "group-name"
+    values = ["docker_security_group"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = ["vpc-02e271a136364ae89"] # Adjust to your VPC ID
+  }
+}
+
 # Security group for allowing traffic to Flask and MySQL
 resource "aws_security_group" "docker_sg" {
+  count       = length(data.aws_security_group.existing_sg.ids) == 0 ? 1 : 0
   name        = "docker_security_group"
   description = "Allow traffic for Docker containers"
 
@@ -18,7 +32,7 @@ resource "aws_security_group" "docker_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # ssh
+    cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere
   }
 
   # Egress rules (allow all outbound traffic)
