@@ -2,8 +2,18 @@ provider "aws" {
   region = "us-east-1" # Adjust to your desired AWS region
 }
 
+# Check if the security group already exists
+data "aws_security_group" "existing" {
+  filter {
+    name   = "group-name"
+    values = ["docker_security_group"]
+  }
+}
+
 # Security group for allowing traffic to Flask and MySQL
 resource "aws_security_group" "docker_sg" {
+  count = length(data.aws_security_group.existing.ids) == 0 ? 1 : 0
+
   name        = "docker_security_group"
   description = "Allow traffic for Docker containers"
 
@@ -14,11 +24,13 @@ resource "aws_security_group" "docker_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allow HTTP from anywhere
   }
-   ingress {
+
+  # Allow SSH
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # ssh
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # Egress rules (allow all outbound traffic)
@@ -38,30 +50,30 @@ resource "aws_security_group" "docker_sg" {
 resource "aws_instance" "docker_host" {
   ami           = "ami-0df8c184d5f6ae949" # Amazon Linux 2 AMI (replace if needed)
   instance_type = "t2.micro"
-  key_name      = "cicd_catgif_key"       # Replace with your AWS key pair name
-  security_groups = [aws_security_group.docker_sg.name]
+  key_name      = "cicd_catgif_key" # Replace with your AWS key pair name
+  security_groups = [aws_security_group.docker_sg[0].name]
 
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
-              #!/bin/bash
-              sudo yum update -y
-              sudo amazon-linux-extras enable docker
-              sudo yum install -y docker
-              sudo yum install -y libxcrypt-compat
-              sudo service docker start
-              sudo usermod -a -G docker ec2-user
-              curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              chmod +x /usr/local/bin/docker-compose
-              echo "Docker and Docker Compose installed."
+    #!/bin/bash
+    sudo yum update -y
+    sudo amazon-linux-extras enable docker
+    sudo yum install -y docker
+    sudo yum install -y libxcrypt-compat
+    sudo service docker start
+    sudo usermod -a -G docker ec2-user
+    curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    echo "Docker and Docker Compose installed."
 
-              # Clone your project repository
-              sudo yum install -y git
-              git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
+    # Clone your project repository
+    sudo yum install -y git
+    git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
 
-              # Change directory and run Docker Compose
-              cd /home/ec2-user/cat-gif-website
-              docker-compose up -d --no-build
-              EOF
+    # Change directory and run Docker Compose
+    cd /home/ec2-user/cat-gif-website
+    docker-compose up -d --no-build
+  EOF
 
   tags = {
     Name = "DockerHost"
