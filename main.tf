@@ -2,22 +2,8 @@ provider "aws" {
   region = "us-east-1" # Adjust to your desired AWS region
 }
 
-# Check if the security group already exists
-data "aws_security_group" "existing_sg" {
-  filter {
-    name   = "group-name"
-    values = ["docker_security_group"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = ["vpc-02e271a136364ae89"] # Adjust to your VPC ID
-  }
-}
-
 # Security group for allowing traffic to Flask and MySQL
 resource "aws_security_group" "docker_sg" {
-  count       = length(data.aws_security_group.existing_sg.ids) == 0 ? 1 : 0
   name        = "docker_security_group"
   description = "Allow traffic for Docker containers"
 
@@ -32,7 +18,7 @@ resource "aws_security_group" "docker_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere
+    cidr_blocks = ["0.0.0.0/0"] # ssh
   }
 
   # Egress rules (allow all outbound traffic)
@@ -53,7 +39,7 @@ resource "aws_instance" "docker_host" {
   ami           = "ami-0df8c184d5f6ae949" # Amazon Linux 2 AMI (replace if needed)
   instance_type = "t2.micro"
   key_name      = "cicd_catgif_key"       # Replace with your AWS key pair name
-  security_groups = data.aws_security_group.existing_sg.ids == 0 ? [aws_security_group.docker_sg.name] : [data.aws_security_group.existing_sg.name]
+  security_groups = [aws_security_group.docker_sg.name]
 
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
