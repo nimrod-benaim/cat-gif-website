@@ -108,11 +108,10 @@ jobs:
         run: terraform init
 
       - name: Apply Terraform Plan
-        id: apply
         run: |
           terraform apply -auto-approve
-          echo "PUBLIC_IP=$(terraform output -raw instance_public_ip)" >> $GITHUB_ENV
-          
+          PUBLIC_IP=$(terraform output -raw instance_public_ip)
+          echo "::set-output name=public_ip::$PUBLIC_IP"
 
       - name: Save SSH Key
         run: |
@@ -122,7 +121,7 @@ jobs:
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
-          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@$PUBLIC_IP << 'EOF'
+          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
           set -e
           mkdir -p ~/app
           chmod 755 ~/app
