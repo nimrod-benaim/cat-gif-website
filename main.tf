@@ -8,11 +8,13 @@ data "aws_security_group" "existing" {
     name   = "group-name"
     values = ["docker_security_group"]
   }
+
+  vpc_id = "vpc-02e271a136364ae89" # Replace with your VPC ID
 }
 
 # Security group for allowing traffic to Flask and MySQL
 resource "aws_security_group" "docker_sg" {
-  count = length(data.aws_security_group.existing.ids) == 0 ? 1 : 0
+  count = data.aws_security_group.existing.id != "" ? 0 : 1
 
   name        = "docker_security_group"
   description = "Allow traffic for Docker containers"
