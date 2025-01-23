@@ -155,11 +155,6 @@ jobs:
             --port 22 \
             --cidr "$RUNNER_IP/32"
 
-      - name: Upload .env File to EC2
-        run: |
-          echo "Stage: Upload .env File to EC2"
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem .env ec2-user@${{ steps.create_ec2.outputs.public_ip }}:~/app/
-
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
