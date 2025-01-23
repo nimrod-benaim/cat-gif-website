@@ -53,7 +53,9 @@ resource "aws_instance" "docker_host" {
   ami           = "ami-0df8c184d5f6ae949" # Amazon Linux 2 AMI (replace if needed)
   instance_type = "t2.micro"
   key_name      = "cicd_catgif_key" # Replace with your AWS key pair name
-  security_groups = [aws_security_group.docker_sg[0].name]
+
+  # Conditionally assign the correct security group
+  security_groups = data.aws_security_group.existing.id != "" ? [data.aws_security_group.existing.name] : [aws_security_group.docker_sg[0].name]
 
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
