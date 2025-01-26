@@ -120,6 +120,7 @@ jobs:
 
       - name: Install Docker and Docker Compose on EC2
         run: |
+          sleep 120
           echo "Stage: Install Docker and Docker Compose on EC2"
           ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
           set -e
