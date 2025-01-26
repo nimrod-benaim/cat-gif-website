@@ -118,21 +118,6 @@ jobs:
           echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
           chmod 600 ec2-key.pem
 
-      - name: Install Docker and Docker Compose on EC2
-        run: |
-          echo "Stage: Install Docker and Docker Compose on EC2"
-          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
-          set -e
-          mkdir -p ~/app
-          chmod 755 ~/app
-          sudo yum update -y
-          sudo yum install -y docker
-          sudo systemctl start docker
-          sudo systemctl enable docker
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          echo "Docker and Docker Compose installed."
-          EOF
 
       - name: Deploy Application on EC2
         run: |
