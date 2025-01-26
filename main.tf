@@ -57,24 +57,29 @@ resource "aws_instance" "docker_host" {
   # Conditionally assign the correct security group
   security_groups = data.aws_security_group.existing.id != "" ? [data.aws_security_group.existing.name] : [aws_security_group.docker_sg[0].name]
 
-  # User data script to install Docker and Docker Compose
+  # User data script to install Docker, Docker Compose, and run the application
   user_data = <<-EOF
     #!/bin/bash
+    set -e
+
+    # Update the system and install necessary tools
     sudo yum update -y
+    sudo yum install -y git docker libxcrypt-compat
+
+    # Enable and start Docker
     sudo amazon-linux-extras enable docker
-    sudo yum install -y docker
-    sudo yum install -y libxcrypt-compat
     sudo service docker start
+    sudo systemctl enable docker
     sudo usermod -a -G docker ec2-user
+
+    # Install Docker Compose
     sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
-    echo "Docker and Docker Compose installed."
 
-    # Clone your project repository
-    sudo yum install -y git
+    # Clone the project repository
     git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
 
-    # Change directory and run Docker Compose
+    # Navigate to the project directory and deploy the application using Docker Compose
     cd /home/ec2-user/cat-gif-website
     docker-compose up -d --no-build
   EOF
