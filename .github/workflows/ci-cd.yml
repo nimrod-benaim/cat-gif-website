@@ -111,8 +111,8 @@ jobs:
         run: |
           terraform apply -auto-approve
           PUBLIC_IP=$(terraform output -raw instance_public_ip)
-          echo "::set-output name=public_ip::$PUBLIC_IP"
-
+          echo "::set-output name=public_ip::$(terraform output -raw instance_public_ip)"
+#########now#######
       - name: Save SSH Key
         run: |
           echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
@@ -121,7 +121,7 @@ jobs:
       - name: Install Docker and Docker Compose on EC2
         run: |
           echo "Stage: Install Docker and Docker Compose on EC2"
-          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ needs.deploy.outputs.public_ip }}
           set -e
           mkdir -p ~/app
           chmod 755 ~/app
