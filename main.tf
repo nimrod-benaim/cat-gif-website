@@ -76,6 +76,17 @@ resource "aws_instance" "docker_host" {
     sudo service docker start
     sudo usermod -a -G docker ec2-user
 
+      echo "Docker and Docker Compose installed."
+
+    # Create the .env file with environment variables
+    echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_PORT=${var.database_port}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_USER=${var.database_user}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_PASSWORD=${var.database_password}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_NAME=${var.database_name}" >> /home/ec2-user/cat-gif-website/.env
+    echo "MYSQL_ROOT_PASSWORD=${var.mysql_root_password}" >> /home/ec2-user/cat-gif-website/.env
+    echo "PORT=${var.port}" >> /home/ec2-user/cat-gif-website/.env
+
     # Install Docker Compose
     sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
