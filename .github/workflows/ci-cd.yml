@@ -109,26 +109,27 @@ jobs:
 
       - name: Apply Terraform Plan
         run: |
+          terraform plan 
           terraform apply -auto-approve
           PUBLIC_IP=$(terraform output -raw instance_public_ip)
           echo "::set-output name=public_ip::$PUBLIC_IP"
 
-      - name: Save SSH Key
-        run: |
-          echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
-          chmod 600 ec2-key.pem
+      # - name: Save SSH Key
+      #   run: |
+      #     echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
+      #     chmod 600 ec2-key.pem
 
 
-      - name: Deploy Application on EC2
-        run: |
-          echo "Stage: Deploy Application on EC2"
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yaml ec2-user@${{ steps.apply.outputs.public_ip }}:~/app/
-          scp -o StrictHostKeyChecking=no -i ec2-key.pem .env ec2-user@${{ steps.apply.outputs.public_ip }}:~/app/
-          ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
-          set -e
-          cd ~/app
-          docker-compose pull
-          docker-compose down
-          docker-compose up -d
-          echo "Deployment complete!"
-          EOF
+      # - name: Deploy Application on EC2
+      #   run: |
+      #     echo "Stage: Deploy Application on EC2"
+      #   #  scp -o StrictHostKeyChecking=no -i ec2-key.pem docker-compose.yaml ec2-user@${{ steps.apply.outputs.public_ip }}:~/app/
+      #   #  scp -o StrictHostKeyChecking=no -i ec2-key.pem .env ec2-user@${{ steps.apply.outputs.public_ip }}:~/app/
+      #     ssh -o StrictHostKeyChecking=no -T -i ec2-key.pem ec2-user@${{ steps.apply.outputs.public_ip }} << 'EOF'
+      #     set -e
+      #     cd ~/app
+      #     docker-compose pull
+      #     docker-compose down
+      #     docker-compose up -d
+      #     echo "Deployment complete!"
+      #     EOF
