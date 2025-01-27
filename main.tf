@@ -72,6 +72,7 @@ resource "aws_instance" "docker_host" {
     sudo yum update -y
     sudo amazon-linux-extras enable docker
     sudo yum install -y docker git
+    sudo yum install -y libxcrypt-compat
     sudo service docker start
     sudo usermod -a -G docker ec2-user
 
