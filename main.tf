@@ -60,6 +60,15 @@ resource "aws_instance" "docker_host" {
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
     #!/bin/bash
+
+    export DATABASE_HOST=${var.DATABASE_HOST}
+    export DATABASE_PORT=${var.DATABASE_PORT}
+    export DATABASE_USER=${var.DATABASE_USER}
+    export DATABASE_PASSWORD=${var.DATABASE_PASSWORD}
+    export DATABASE_NAME=${var.DATABASE_NAME}
+    export MYSQL_ROOT_PASSWORD=${var.MYSQL_ROOT_PASSWORD}
+    export PORT=${var.PORT}
+
     sudo yum update -y
     sudo amazon-linux-extras enable docker
     sudo yum install -y docker
@@ -69,6 +78,15 @@ resource "aws_instance" "docker_host" {
     sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Docker and Docker Compose installed."
+
+    echo "DATABASE_HOST=${var.DATABASE_HOST}" > /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_PORT=${var.DATABASE_PORT}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_USER=${var.DATABASE_USER}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_PASSWORD=${var.DATABASE_PASSWORD}" >> /home/ec2-user/cat-gif-website/.env
+    echo "DATABASE_NAME=${var.DATABASE_NAME}" >> /home/ec2-user/cat-gif-website/.env
+    echo "MYSQL_ROOT_PASSWORD=${var.MYSQL_ROOT_PASSWORD}" >> /home/ec2-user/cat-gif-website/.env
+    echo "PORT=${var.PORT}" >> /home/ec2-user/cat-gif-website/.env
+
 
     # Clone your project repository
     sudo yum install -y git

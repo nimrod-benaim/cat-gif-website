@@ -108,6 +108,15 @@ jobs:
         run: terraform init
 
       - name: Apply Terraform Plan
+        env:  
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          KEY_PAIR_NAME: ${{ secrets.KEY_PAIR_NAME }}
+          IAM_USER_NAME: ${{ secrets.IAM_USER_NAME }}
         run: |
           terraform plan 
           terraform apply -auto-approve
