@@ -37,3 +37,9 @@ variable "iam_user_name" {
   description = "The IAM user name"
   type        = string
 }
+
+variable "port" {
+  description = "The port number the application will use."
+  type        = number
+  default     = 5000 # Default to Flask's standard port; modify if needed
+}
