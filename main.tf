@@ -61,6 +61,14 @@ resource "aws_instance" "docker_host" {
 user_data = <<-EOF
   #!/bin/bash
 
+  export DATABASE_HOST=${var.database_host}
+  export DATABASE_PORT=${var.database_port}
+  export DATABASE_USER=${var.database_user}
+  export DATABASE_PASSWORD=${var.database_password}
+  export DATABASE_NAME=${var.database_name}
+  export MYSQL_ROOT_PASSWORD=${var.mysql_root_password}
+  export PORT=${var.port}
+
   sudo yum update -y
   sudo amazon-linux-extras enable docker
   sudo yum install -y docker
