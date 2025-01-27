@@ -1,3 +1,46 @@
 .env
 cicd_catgif_key.pem
 id_rsa
+docker_host_public_ip.txt
+# Ignore Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Ignore Terraform plan files
+*.tfplan
+
+# Ignore crash logs
+crash.log
+
+# Ignore Terraform variables and secrets files
+*.tfvars
+*.tfvars.json
+
+# Ignore backup files
+*.backup
+
+# Ignore the .terraform directory
+.terraform/
+.terraform.lock.hcl
+
+# Ignore sensitive files like SSH keys
+*.pem
+*.key
+*.cer
+
+# Ignore local environment files
+.env
+.env.*
+
+# Ignore log files
+*.log
+
+# Ignore any temp or local debug files
+*.tmp
+*.swp
+*.bak
+
+# Ignore files from specific operating systems
+.DS_Store          # macOS
+Thumbs.db          # Windows
+desktop.ini        # Windows
