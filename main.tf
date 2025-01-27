@@ -58,34 +58,28 @@ resource "aws_instance" "docker_host" {
   security_groups = data.aws_security_group.existing.id != "" ? [data.aws_security_group.existing.name] : [aws_security_group.docker_sg[0].name]
 
   # User data script to install Docker and Docker Compose
-  user_data = <<-EOF
-    #!/bin/bash
+user_data = <<-EOF
+  #!/bin/bash
 
-    export DATABASE_HOST=${var.DATABASE_HOST}
-    export DATABASE_PORT=${var.DATABASE_PORT}
-    export DATABASE_USER=${var.DATABASE_USER}
-    export DATABASE_PASSWORD=${var.DATABASE_PASSWORD}
-    export DATABASE_NAME=${var.DATABASE_NAME}
-    export MYSQL_ROOT_PASSWORD=${var.MYSQL_ROOT_PASSWORD}
-    export PORT=${var.PORT}
+  sudo yum update -y
+  sudo amazon-linux-extras enable docker
+  sudo yum install -y docker
+  sudo yum install -y libxcrypt-compat
+  sudo service docker start
+  sudo usermod -a -G docker ec2-user
+  sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+  echo "Docker and Docker Compose installed."
 
-    sudo yum update -y
-    sudo amazon-linux-extras enable docker
-    sudo yum install -y docker
-    sudo yum install -y libxcrypt-compat
-    sudo service docker start
-    sudo usermod -a -G docker ec2-user
-    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-    echo "Docker and Docker Compose installed."
-
-    echo "DATABASE_HOST=${var.DATABASE_HOST}" > /home/ec2-user/cat-gif-website/.env
-    echo "DATABASE_PORT=${var.DATABASE_PORT}" >> /home/ec2-user/cat-gif-website/.env
-    echo "DATABASE_USER=${var.DATABASE_USER}" >> /home/ec2-user/cat-gif-website/.env
-    echo "DATABASE_PASSWORD=${var.DATABASE_PASSWORD}" >> /home/ec2-user/cat-gif-website/.env
-    echo "DATABASE_NAME=${var.DATABASE_NAME}" >> /home/ec2-user/cat-gif-website/.env
-    echo "MYSQL_ROOT_PASSWORD=${var.MYSQL_ROOT_PASSWORD}" >> /home/ec2-user/cat-gif-website/.env
-    echo "PORT=${var.PORT}" >> /home/ec2-user/cat-gif-website/.env
+  # Create the .env file with environment variables
+  echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
+  echo "DATABASE_PORT=${var.database_port}" >> /home/ec2-user/cat-gif-website/.env
+  echo "DATABASE_USER=${var.database_user}" >> /home/ec2-user/cat-gif-website/.env
+  echo "DATABASE_PASSWORD=${var.database_password}" >> /home/ec2-user/cat-gif-website/.env
+  echo "DATABASE_NAME=${var.database_name}" >> /home/ec2-user/cat-gif-website/.env
+  echo "MYSQL_ROOT_PASSWORD=${var.mysql_root_password}" >> /home/ec2-user/cat-gif-website/.env
+  echo "PORT=${var.port}" >> /home/ec2-user/cat-gif-website/.env
+EOF
 
 
     # Clone your project repository
