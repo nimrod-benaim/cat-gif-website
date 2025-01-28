@@ -134,6 +134,7 @@ resource "aws_instance" "docker_host" {
     pwd
     cd /home/ec2-user/cat-gif-website/
     touch .env
+    
     echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_PORT=${var.database_port}" >> /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_USER=${var.database_user}" >> /home/ec2-user/cat-gif-website/.env
