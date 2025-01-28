@@ -131,6 +131,8 @@ resource "aws_instance" "docker_host" {
 
     # Create the .env file with environment variables
     ls
+    pwd
+    sleep 70
     cd /home/ec2-user/cat-gif-website/
     touch .env
     echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
