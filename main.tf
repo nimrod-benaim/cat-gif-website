@@ -108,6 +108,9 @@ resource "aws_instance" "docker_host" {
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
     #!/bin/bash
+    # Clone the project repository
+    git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
+
     export DATABASE_HOST=${var.database_host}
     export DATABASE_PORT=${var.database_port}
     export DATABASE_USER=${var.database_user}
@@ -141,9 +144,6 @@ resource "aws_instance" "docker_host" {
     # Install Docker Compose
     sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
-
-    # Clone the project repository
-    git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
 
     # Change directory and run Docker Compose
     cd /home/ec2-user/cat-gif-website
