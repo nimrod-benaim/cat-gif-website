@@ -108,8 +108,6 @@ resource "aws_instance" "docker_host" {
   # User data script to install Docker and Docker Compose
   user_data = <<-EOF
     #!/bin/bash
-    # Clone the project repository
-    git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
 
     export DATABASE_HOST=${var.database_host}
     export DATABASE_PORT=${var.database_port}
@@ -127,14 +125,16 @@ resource "aws_instance" "docker_host" {
     sudo service docker start
     sudo usermod -a -G docker ec2-user
 
-      echo "Docker and Docker Compose installed."
+    # Clone the project repository
+    git clone https://github.com/nimrod-benaim/cat-gif-website.git /home/ec2-user/cat-gif-website
+
+    echo "Docker and Docker Compose installed."
 
     # Create the .env file with environment variables
     ls
     pwd
     cd /home/ec2-user/cat-gif-website/
     touch .env
-    
     echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_PORT=${var.database_port}" >> /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_USER=${var.database_user}" >> /home/ec2-user/cat-gif-website/.env
