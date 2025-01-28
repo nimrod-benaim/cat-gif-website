@@ -127,7 +127,8 @@ resource "aws_instance" "docker_host" {
       echo "Docker and Docker Compose installed."
 
     # Create the .env file with environment variables
-    sudo touch cat-gif-website/.env
+    sudo cd cat-gif-website/
+    sudo touch .env
     echo "DATABASE_HOST=${var.database_host}" > /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_PORT=${var.database_port}" >> /home/ec2-user/cat-gif-website/.env
     echo "DATABASE_USER=${var.database_user}" >> /home/ec2-user/cat-gif-website/.env
