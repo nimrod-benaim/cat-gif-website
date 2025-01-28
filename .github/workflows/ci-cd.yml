@@ -117,6 +117,7 @@ jobs:
           TF_VAR_mysql_root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           TF_VAR_key_pair_name: ${{ secrets.KEY_PAIR_NAME }}
           TF_VAR_iam_user_name: ${{ secrets.IAM_USER_NAME }}
+          TF_VAR_mysql_database: ${{ secrets.MYSQL_DATABASE }}
         run: |
           terraform plan
           terraform apply -auto-approve
