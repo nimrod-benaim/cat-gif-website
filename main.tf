@@ -156,6 +156,7 @@ resource "aws_instance" "docker_host" {
 
     # Change directory and run Docker Compose
     cd /home/ec2-user/cat-gif-website
+    docker-compose pull
     docker-compose up -d --no-build
   EOF
 
