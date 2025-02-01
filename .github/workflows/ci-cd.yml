@@ -91,6 +91,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 🔹 Install Google Cloud SDK (MUST come before authentication) // Ensures gcloud CLI is available
       - name: Install Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
@@ -98,20 +99,27 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY_2 }}
           export_default_credentials: true
 
+      # 🔹 Verify installation to ensure gcloud is available // Confirms that gcloud is installed correctly
       - name: Verify gcloud Installation
         run: gcloud --version
 
-      # 🔹 Confirm authentication was successful
-      - name: Confirm Active Account
-        run: gcloud auth list
+      # 🔹 Authenticate with Google Cloud using the service account // Ensures a valid active account is used before running any gcloud commands
+      - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
 
-      # 🔹 Set the correct project and region
+      # 🔹 Confirm authentication was successful // fix for "You do not currently have an active account selected" error
+      - name: Confirm Active Account
+        run: gcloud auth list --format="value(account)"
+
+      # 🔹 Set the correct project and region AFTER authentication // Ensures gcloud recognizes the credentials before setting configurations
       - name: Set Project and Region
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
           gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
 
-      # 🔹 Debugging step (optional)
+      # 🔹 Debugging step to confirm authentication and configuration // Prints current GCP settings
       - name: Debug GCP Config
         run: gcloud config list
 
