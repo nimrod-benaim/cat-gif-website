@@ -122,6 +122,10 @@ jobs:
       # 🔹 Debugging step to confirm authentication and configuration // Prints current GCP settings
       - name: Debug GCP Config
         run: gcloud config list
+
+
+
+        
   configure-kubectl:
     name: Configure kubectl for GKE
     runs-on: ubuntu-20.04
