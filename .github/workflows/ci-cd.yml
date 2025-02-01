@@ -101,6 +101,21 @@ jobs:
       - name: Verify gcloud Installation
         run: gcloud --version
 
+      # 🔹 Confirm authentication was successful
+      - name: Confirm Active Account
+        run: gcloud auth list
+
+      # 🔹 Set the correct project and region
+      - name: Set Project and Region
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
+
+      # 🔹 Debugging step (optional)
+      - name: Debug GCP Config
+        run: gcloud config list
+
+
   configure-kubectl:
     name: Configure kubectl for GKE
     runs-on: ubuntu-latest
@@ -108,6 +123,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
