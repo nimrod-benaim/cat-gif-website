@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build and Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
 
   test:
     name: Deploy to Docker Compose
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build
     env:
       PORT: 5000
@@ -86,7 +86,7 @@ jobs:
 
   setup-gcloud:
     name: Setup Google Cloud SDK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -126,7 +126,7 @@ jobs:
 
   configure-kubectl:
     name: Configure kubectl for GKE
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup-gcloud
     steps:
       - name: Checkout Code
@@ -145,9 +145,8 @@ jobs:
 
       - name: Install gke-gcloud-auth-plugin  # 🔹 FIX: Install the missing plugin... THIS BITCH TOOK FOREVER TO FIND
         run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
-          sudo apt-get update && sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+          sudo apt-get update
+          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
       - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
         run: |
@@ -158,7 +157,7 @@ jobs:
 
   deploy:
     name: Deploy to GKE with Terraform
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [test, configure-kubectl]
     steps:
       - name: Checkout Code
