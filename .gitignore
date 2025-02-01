@@ -2,6 +2,8 @@
 cicd_catgif_key.pem
 id_rsa
 docker_host_public_ip.txt
+cat-gif-project-43612531b1c7
+cat-gif-project-43612531b1c7.json
 # Ignore Terraform state files
 *.tfstate
 *.tfstate.*

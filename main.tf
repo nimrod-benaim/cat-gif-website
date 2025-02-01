@@ -1,8 +1,16 @@
 provider "google" {
-# project = "var.gcp_project_id"
-  project = "cat-gif-project"
+  project     = var.gcp_project_id
+  credentials = file(var.gcp_credentials_path)
   region  = "us-central1"
-  credentials = file("C:\\Program Files (x86)\\Google\\Cloud SDK\\terraform-key.json")
+}
+variable "gcp_project_id" {
+  description = "gcp project id"
+  type        = string
+}
+
+variable "gcp_credentials_path" {
+  description = "gcp_credentials_path"
+  type        = string
 }
 
 resource "google_container_cluster" "primary" {
@@ -24,12 +32,4 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-resource "null_resource" "kubectl_apply" {
-  provisioner "local-exec" {
-    command = <<EOT
-      gcloud container clusters get-credentials ${google_container_cluster.primary.name} --region us-central1
-      kubectl apply -f k8s/
-    EOT
-  }
-  depends_on = [google_container_cluster.primary]
-}
+
