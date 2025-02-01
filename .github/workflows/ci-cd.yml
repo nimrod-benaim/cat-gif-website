@@ -146,7 +146,7 @@ jobs:
       - name: Install gke-gcloud-auth-plugin  # 🔹 FIX: Install the missing plugin... THIS BITCH TOOK FOREVER TO FIND
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+          gcloud components install gke-gcloud-auth-plugin --quiet
 
       - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
         run: |
