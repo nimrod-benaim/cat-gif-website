@@ -14,7 +14,7 @@ variable "gcp_credentials_path" {
 }
 
 resource "google_container_cluster" "primary" {
-  name     = "gke-cluster"
+  name     = "cat-gif-cluster"
   location = "us-central1"
   initial_node_count = 1
   node_config {

@@ -207,6 +207,7 @@ jobs:
           TF_VAR_iam_user_name: ${{ secrets.IAM_USER_NAME }}
           TF_VAR_mysql_database: ${{ secrets.MYSQL_DATABASE }}
           TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_gke_cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
           TF_VAR_gcp_credentials_path: gcp-key.json
         run: |
           terraform plan
