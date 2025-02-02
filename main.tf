@@ -16,10 +16,9 @@ variable "gcp_credentials_path" {
 resource "google_container_cluster" "primary" {
   name     = "cat-gif-cluster"
   location = "us-central1"
-  initial_node_count = 1
-  node_config {
-    machine_type = "e2-small"
-  }
+
+  remove_default_node_pool = true
+  initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_nodes" {
@@ -27,9 +26,8 @@ resource "google_container_node_pool" "primary_nodes" {
   location   = "us-central1"
   cluster    = google_container_cluster.primary.name
   node_count = 1
+
   node_config {
     machine_type = "e2-small"
   }
 }
-
-

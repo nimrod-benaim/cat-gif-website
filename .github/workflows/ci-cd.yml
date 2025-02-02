@@ -89,6 +89,7 @@ jobs:
   setup-gcloud:
     name: Setup Google Cloud SDK
     runs-on: ubuntu-22.04
+    needs: test
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -147,18 +148,23 @@ jobs:
           sudo mv kubectl /usr/local/bin/
           kubectl version --client
 
+      # - name: Install kubectl (Official Google Version)
+      #   run: |
+      #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      #     chmod +x kubectl
+      #     sudo mv kubectl /usr/local/bin/
 
-      - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
-        run: |
-          gcloud auth list    
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
-          kubectl version --client
-          kubectl cluster-info
+      # - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
+      #   run: |
+      #     gcloud auth list    
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+      #     kubectl version --client
+      #     kubectl cluster-info
 
   deploy:
     name: Deploy to GKE with Terraform
     runs-on: ubuntu-22.04
-    needs: [test, configure-kubectl]
+    needs: configure-kubectl
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -197,16 +203,7 @@ jobs:
           TF_VAR_gcp_credentials_path: gcp-key.json
         run: |
           terraform plan
-          terraform apply -auto-approve
-
-      - name: Wait for Cluster Readiness
-        run: |
-          for i in {1..10}; do
-            gcloud container clusters describe ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }} \
-              --format='value(status)' | grep -q "RUNNING" && break
-            echo "Waiting for cluster to be ready..."
-            sleep 10
-          done
+          terraform apply -auto-approve 
 
       - name: Apply Kubernetes Manifests
         run: |
