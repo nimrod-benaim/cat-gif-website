@@ -48,3 +48,17 @@ spec:
             secretKeyRef:
               name: app-secrets
               key: DATABASE_PASSWORD
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: catgif-service
+spec:
+  selector:
+    app: catgif
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
