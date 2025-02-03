@@ -1,7 +1,7 @@
 provider "google" {
   project     = var.gcp_project_id
   credentials = file(var.gcp_credentials_path)
-  region  = "us-central1"
+  zone        = "us-central1-a" 
 }
 variable "gcp_project_id" {
   description = "gcp project id"
