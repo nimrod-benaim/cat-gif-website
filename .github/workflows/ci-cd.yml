@@ -149,8 +149,7 @@ jobs:
           kubectl version --client
 
       - name: Install gke-gcloud-auth-plugin
-        run: |
-           sudo apt-get install google-cloud-cli-gke-gcloud-auth-plugin
+        run: gcloud components install gke-gcloud-auth-plugin
 
       # - name: Install kubectl (Official Google Version)
       #   run: |
