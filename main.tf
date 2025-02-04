@@ -29,5 +29,6 @@ resource "google_container_node_pool" "primary_nodes" {
 
   node_config {
     machine_type = "e2-small"
+    disk_type = "pd-standard"
   }
 }
