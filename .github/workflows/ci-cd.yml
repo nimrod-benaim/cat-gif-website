@@ -155,8 +155,13 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - name: Install GKE Auth Plugin
-        run: gcloud components install gke-gcloud-auth-plugin
+
+#       name: Install GKE Auth Plugin & Ensures kubectl uses the new plugin
+      - name: Install and Configure GKE Auth Plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True  
+
 
       - name: Verify Plugin Installation
         run: gke-gcloud-auth-plugin --version
@@ -252,6 +257,11 @@ jobs:
       #   run: |
       #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
       #     kubectl apply -f k8s/
+#temp
+      - name: Debug GKE Cluster List
+        run: |
+          gcloud container clusters list --region=${{ secrets.GKE_CLUSTER_REGION }}
+#temp
 
       - name: Get GKE Credentials
         run: |
