@@ -16,21 +16,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-# # remove 
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.8'
+# remove 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
 
-#       - name: Install Dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install -r requirements.txt
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-#       - name: Lint and Test
-#         run: |
-#           echo "No tests implemented"  # Replace with actual test commands if any
-# # remove 
+      - name: Lint and Test
+        run: |
+          echo "No tests implemented"  # Replace with actual test commands if any
+# remove 
 
   test:
     name: Deploy to Docker Compose
@@ -175,18 +175,49 @@ jobs:
       #     kubectl cluster-info
 
   deploy:
-    name: Deploy to GKE with Helm
+    name: Deploy to GKE with Terraform
     runs-on: ubuntu-22.04
     needs: configure-kubectl
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Create GCP Credentials File
+        run: |
+          echo '${{ secrets.GCP_SA_KEY_2 }}' > gcp-key.json
+
       - name: Authenticate with Google Cloud
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
           export_default_credentials: true
+
+      # - name: Get GKE Credentials # 🔹"gcloud auth list" is for debugging, to confirm authentication
+      #   run: |
+      #     gcloud auth list
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+
+
+# #########
+#       - name: Setup Google Cloud SDK
+#         uses: google-github-actions/setup-gcloud@v1
+#         with:
+#           project_id: ${{ secrets.GCP_PROJECT }}
+#           service_account_key: ${{ secrets.GCP_SA_KEY }}
+#           export_default_credentials: true
+
+#       - name: Install GKE Auth Plugin
+#         run: gcloud components install gke-gcloud-auth-plugin
+
+#       - name: Verify Plugin Installation
+#         run: gke-gcloud-auth-plugin --version
+
+
+# #########
+
+
+      - name: Initialize Terraform
+        run: terraform init
 
       - name: Install Helm
         run: |
@@ -196,13 +227,6 @@ jobs:
 
       - name: Verify Helm Installation
         run: helm version
-
-      - name: Get GKE Credentials
-        run: |
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
-
-      - name: Initialize Terraform
-        run: terraform init
 
       - name: Apply Terraform Plan
         env:
@@ -222,6 +246,11 @@ jobs:
         run: |
           terraform plan
           terraform apply -auto-approve 
+
+      # - name: Apply Kubernetes Manifests
+      #   run: |
+      #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
+      #     kubectl apply -f k8s/
 
       - name: Deploy Helm Chart
         run: |
