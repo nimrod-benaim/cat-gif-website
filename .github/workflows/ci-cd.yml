@@ -228,6 +228,7 @@ jobs:
       - name: Verify Helm Installation
         run: helm version
 
+
       - name: Apply Terraform Plan
         env:
           TF_VAR_database_host: ${{ secrets.DATABASE_HOST }}
@@ -251,6 +252,11 @@ jobs:
       #   run: |
       #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
       #     kubectl apply -f k8s/
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+          kubectl cluster-info  # Debugging step to verify connection
 
       - name: Deploy Helm Chart
         run: |
