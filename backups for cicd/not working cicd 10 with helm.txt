@@ -1,0 +1,157 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker-compose build
+          docker-compose push 
+
+  test:
+    name: Deploy & Test with Docker Compose
+    runs-on: ubuntu-22.04
+    needs: build
+    env:
+      PORT: 5000
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USER: catgif_user
+      DATABASE_PASSWORD: catgif_password
+      DATABASE_NAME: catgif_db
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: catgif_db
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start Application
+        run: docker-compose up -d
+
+      - name: Test Application
+        run: |
+          echo "Testing application with curl..."
+          until curl -f http://localhost:5000; do
+            sleep 2
+          done
+          echo "Test passed!"
+
+      - name: Shutdown Application
+        run: docker-compose down
+
+  setup-gcloud:
+    name: Setup Google Cloud SDK
+    runs-on: ubuntu-22.04
+    needs: test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+
+      - name: Verify gcloud Installation
+        run: gcloud --version
+
+      - name: Set GCP Configurations
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
+
+  configure-kubectl:
+    name: Configure kubectl for GKE
+    runs-on: ubuntu-22.04
+    needs: setup-gcloud
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
+      - name: Install GKE Auth Plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+          kubectl cluster-info
+
+  deploy:
+    name: Deploy to GKE with Terraform
+    runs-on: ubuntu-22.04
+    needs: configure-kubectl
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod +x get_helm.sh
+          ./get_helm.sh
+
+      - name: Verify Helm Installation
+        run: helm version
+
+      - name: Get GKE Credentials
+        run: gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Apply Terraform Plan
+        run: |
+          terraform plan
+          terraform apply -auto-approve 
+
+      - name: Deploy Helm Chart
+        run: |
+          helm upgrade --install catgif ./helm/catgif \
+            --namespace default \
+            --set image.repository=nimrod1/cat_gif_site_new \
+            --set image.tag=ver-2.0 \
+            --set service.type=LoadBalancer
