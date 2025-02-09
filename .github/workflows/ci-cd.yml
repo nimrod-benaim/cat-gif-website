@@ -227,6 +227,12 @@ jobs:
 # #########
 
 
+      - name: Install GKE Auth Plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          echo "export USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> ~/.bashrc
+          source ~/.bashrc
+
       - name: Initialize Terraform
         run: terraform init
 
