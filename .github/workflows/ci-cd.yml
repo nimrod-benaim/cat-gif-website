@@ -291,7 +291,7 @@ jobs:
 
 
   monitoring:
-    ame: adding pormetheus and garfana and monitoring
+    name: adding pormetheus and garfana and monitoring
     runs-on: ubuntu-22.04
     needs: configure-kubectl
     steps:
