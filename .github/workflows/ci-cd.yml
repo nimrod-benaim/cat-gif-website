@@ -263,9 +263,14 @@ jobs:
           gcloud container clusters list --region=${{ secrets.GKE_CLUSTER_REGION }}
 #temp
 
+      # - name: Get GKE Credentials
+      #   run: |
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+      #     kubectl cluster-info  # Debugging step to verify connection
+
       - name: Get GKE Credentials
         run: |
-          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+          gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
           kubectl cluster-info  # Debugging step to verify connection
 
       - name: Deploy Helm Chart
