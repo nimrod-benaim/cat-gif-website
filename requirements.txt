@@ -2,6 +2,8 @@ Flask>=2.0
 Werkzeug>=2.0
 mysql-connector-python
 
+prometheus_client
+
 Flask
 mysql-connector-python
 python-dotenv
