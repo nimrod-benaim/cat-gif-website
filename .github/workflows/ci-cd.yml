@@ -246,6 +246,7 @@ jobs:
         run: helm version
 
 
+
       - name: Apply Terraform Plan
         env:
           TF_VAR_database_host: ${{ secrets.DATABASE_HOST }}
