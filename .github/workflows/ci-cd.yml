@@ -209,7 +209,7 @@ jobs:
       #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
 
 
-#########
+
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
@@ -223,8 +223,6 @@ jobs:
       - name: Verify Plugin Installation
         run: gke-gcloud-auth-plugin --version
 
-
-# #########
 
 
       - name: Initialize Terraform
@@ -264,11 +262,11 @@ jobs:
       #   run: |
       #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
       #     kubectl apply -f k8s/
-#temp
+    #temp
       - name: Debug GKE Cluster List
         run: |
           gcloud container clusters list --region=${{ secrets.GKE_CLUSTER_REGION }}
-#temp
+    #temp
 
       # - name: Get GKE Credentials
       #   run: |
@@ -291,7 +289,7 @@ jobs:
       - name: time for pods to build
         run: |
           sleep 300
-# make a helm repo here
+    # make a helm repo here
 
       - name: Debug Kubernetes Connection
         run: kubectl get nodes
@@ -316,14 +314,14 @@ jobs:
 
 
 
-#helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-#helm repo update
-#helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-#admin 
-#prom-operator
-#kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
-#http://localhost:3000
-#helm list
+        #helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        #helm repo update
+        #helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+        #admin 
+        #prom-operator
+        #kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+        #http://localhost:3000
+        #helm list
 
       - name: Verify Installation
         run: |

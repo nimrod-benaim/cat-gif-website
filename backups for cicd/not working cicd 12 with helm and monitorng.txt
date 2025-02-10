@@ -322,6 +322,12 @@ jobs:
           gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
 #remove if all works 
 
+      - name: Install GKE Auth Plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Verify Plugin Installation
+        run: gke-gcloud-auth-plugin --version
+
       - name: Get GKE Credentials
         run: |
           gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
