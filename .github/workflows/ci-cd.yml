@@ -290,43 +290,43 @@ jobs:
 # make a helm repo here
 
 
-  monitoring:
-    name: monitoring - adding pormetheus and garfana 
-    runs-on: ubuntu-22.04
-    needs: deploy
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#   monitoring:
+#     name: monitoring - adding pormetheus and garfana 
+#     runs-on: ubuntu-22.04
+#     needs: deploy
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Add Prometheus Helm Repository
-        run: |
-          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-          helm repo update
+#       - name: Add Prometheus Helm Repository
+#         run: |
+#           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+#           helm repo update
 
-      - name: Install Prometheus and Grafana
-        run: |
-          helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-
-
-        # helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
-        #     --namespace monitoring --create-namespace \
-        #     --set grafana.adminPassword=admin \
-        #     --set prometheus.service.type=LoadBalancer \
-        #     --set grafana.service.type=LoadBalancer
+#       - name: Install Prometheus and Grafana
+#         run: |
+#           helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
 
 
+#         # helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+#         #     --namespace monitoring --create-namespace \
+#         #     --set grafana.adminPassword=admin \
+#         #     --set prometheus.service.type=LoadBalancer \
+#         #     --set grafana.service.type=LoadBalancer
 
 
-#helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-#helm repo update
-#helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-#admin 
-#prom-operator
-#kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
-#http://localhost:3000
-#helm list
 
-      - name: Verify Installation
-        run: |
-          kubectl get pods -n monitoring
-          kubectl get svc -n monitoring
+
+# #helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# #helm repo update
+# #helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+# #admin 
+# #prom-operator
+# #kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+# #http://localhost:3000
+# #helm list
+
+#       - name: Verify Installation
+#         run: |
+#           kubectl get pods -n monitoring
+#           kubectl get svc -n monitoring
