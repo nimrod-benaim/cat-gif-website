@@ -280,7 +280,7 @@ jobs:
 
       - name: Deploy Helm Chart
         run: |
-          helm upgrade --install catgif ./catgif \
+          helm upgrade --install catgif ./catgif/charts \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
             --set image.tag=ver-2.0 \
@@ -325,7 +325,7 @@ jobs:
         run: |
           kubectl get pods -n monitoring
           kubectl get svc -n monitoring
-          
+
       # - name: Install Prometheus and Grafana
       #   run: |
       #     helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
