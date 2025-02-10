@@ -45,7 +45,7 @@ spec:
         emptyDir: {}
       - name: init-sql
         configMap:
-          name: {{ .Release.Name }}-init-sql
+          name: {{ .Release.Name }}-init-sql-configmap
 ---
 apiVersion: v1
 kind: Service
