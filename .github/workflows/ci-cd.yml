@@ -316,18 +316,11 @@ jobs:
           gcloud auth list
           gcloud config list
 
-      - name: Set Active GCP Account
-        run: |
-          gcloud config set account $(gcloud auth list --format="value(account)" | head -n 1)
-
-
       - name: Configure gcloud Project and Region
         run: |
           gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
           gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
 #remove if all works 
-
-
 
       - name: Get GKE Credentials
         run: |
