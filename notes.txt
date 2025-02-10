@@ -7,3 +7,4 @@
 7. need to remove ports in the D-C.yaml in the mysql part. avici said we dont need it and sould remove it 
 8. in the cicd i have a temporary fix with the "Authorize GitHub Actions Runner IP". i need to use a aws ssm to fix this.
 9. values.yaml has passwords and usernames out in the open, make sure to hide them later for securety
+10. the helm files dont get saved to a defent repo
