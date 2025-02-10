@@ -285,13 +285,13 @@ jobs:
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=latest \
+            --set image.tag=ver-2.0 \
             --set service.type=LoadBalancer
 # make a helm repo here
 
 
   monitoring:
-    name: adding pormetheus and garfana and monitoring
+    name: monitoring - adding pormetheus and garfana 
     runs-on: ubuntu-22.04
     needs: deploy
     steps:
