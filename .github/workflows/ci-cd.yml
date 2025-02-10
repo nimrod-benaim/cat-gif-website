@@ -288,9 +288,9 @@ jobs:
             --set image.tag=ver-2.0 \
             --set service.type=LoadBalancer
 
-      - name: Debug GKE Cluster List
+      - name: time for pods to build
         run: |
-          sleep 270
+          sleep 300
 
 
 
@@ -304,6 +304,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
+          kubectl cluster-info  # Debugging step to verify connection
+
+      - name: Debug Kubernetes Connection
+        run: kubectl get nodes
 
       - name: Add Prometheus Helm Repository
         run: |
