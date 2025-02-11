@@ -280,7 +280,7 @@ jobs:
 
       - name: Deploy Helm Chart
         run: |
-          helm upgrade --install catgif ./catgif/charts \
+          helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
             --set image.tag=ver-2.0 \
