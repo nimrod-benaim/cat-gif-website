@@ -296,7 +296,7 @@ jobs:
 
       - name: Package Helm Chart
         run: |
-          helm package ./catgif/charts
+          helm package ./catgif
 
       - name: Push to Docker Hub
         run: |
