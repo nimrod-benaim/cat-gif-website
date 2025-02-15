@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: catgif-service
+  namespace: monitoring
+  labels:
+    app: catgif
+spec:
+  selector:
+    app: catgif
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
