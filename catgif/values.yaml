@@ -137,4 +137,7 @@ affinity: {}
 
 prometheus:
   prometheusSpec:
-    serviceMonitorSelector: {}
+    additionalScrapeConfigs:
+      - job_name: 'catgif-app'
+        static_configs:
+          - targets: ['catgif-catgif-service.default.svc.cluster.local:5000']

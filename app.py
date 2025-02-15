@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import os
 import random
 import mysql.connector
@@ -11,7 +11,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Prometheus Counter for tracking visitors
-VISITOR_COUNT = Counter("visitor_count", "Total number of visitors")
+VISITOR_COUNT = Counter('visitor_count', 'Total number of visitors')
 
 # Database configuration
 db_config = {
@@ -66,7 +66,8 @@ def index():
 @app.route("/metrics")
 def metrics():
     """Expose Prometheus metrics."""
-    return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+    return Response(generate_latest(), mimetype='text/plain')
+    #return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
 
 if __name__ == "__main__":
     port = os.environ.get("PORT", 5000)  # Default to 5000 if PORT is not set
