@@ -312,7 +312,7 @@ jobs:
     #monitorng
 
       - name: Debug Kubernetes Connection
-run: kubectl get nodes
+        run: kubectl get nodes
 
       - name: Add Prometheus Helm Repository
         run: |
@@ -322,7 +322,7 @@ run: kubectl get nodes
       # - name: Install Prometheus and Grafana
       #   run: |
       #     helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
-      
+
       - name: Install Prometheus and Grafana
         run: |
           helm install monitoring prometheus-community/kube-prometheus-stack \
