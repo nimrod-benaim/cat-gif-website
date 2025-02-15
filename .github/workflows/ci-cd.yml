@@ -312,16 +312,22 @@ jobs:
     #monitorng
 
       - name: Debug Kubernetes Connection
-        run: kubectl get nodes
+run: kubectl get nodes
 
       - name: Add Prometheus Helm Repository
         run: |
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           helm repo update
 
+      # - name: Install Prometheus and Grafana
+      #   run: |
+      #     helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+      
       - name: Install Prometheus and Grafana
         run: |
-          helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+          helm install monitoring prometheus-community/kube-prometheus-stack \
+            --namespace monitoring --create-namespace \
+            --set grafana.service.type=LoadBalancer
 
       - name: Verify Installation
         run: |
