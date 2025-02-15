@@ -290,18 +290,20 @@ jobs:
       #   run: |
       #     sleep 300
 
-      - name: Log in to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login registry-1.docker.io --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-      - name: Package Helm Chart
-        run: |
-          helm package ./catgif
 
-      - name: Push to Docker Hub
-        run: |
-          CHART_PACKAGE=$(ls charts-*.tgz)
-          helm push $CHART_PACKAGE oci://registry-1.docker.io/nimrod1/cat_gif_site_new_helm
+      # - name: Log in to Docker Hub
+      #   run: |
+      #     echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login registry-1.docker.io --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      # - name: Package Helm Chart
+      #   run: |
+      #     helm package ./catgif
+
+      # - name: Push to Docker Hub
+      #   run: |
+      #     CHART_PACKAGE=$(ls charts-*.tgz)
+      #     helm push $CHART_PACKAGE oci://registry-1.docker.io/nimrod1/cat_gif_site_new_helm
 
 
 
