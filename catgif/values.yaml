@@ -135,10 +135,3 @@ tolerations: []
 
 affinity: {}
 
-prometheus:
-  prometheusSpec:
-    additionalScrapeConfigs:
-      - job_name: 'catgif-app'
-        static_configs:
-          - targets: ['catgif-catgif-service:5000']
-#          - targets: ['catgif-catgif-service:80']

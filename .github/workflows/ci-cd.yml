@@ -322,7 +322,8 @@ jobs:
 
       - name: Install Prometheus and Grafana
         run: |
-          helm install monitoring prometheus-community/kube-prometheus-stack \
+          helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \ 
+            -f catgif/values_prometheus.yaml \
             --namespace default \
             --set grafana.service.type=LoadBalancer
 

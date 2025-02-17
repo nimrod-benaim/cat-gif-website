@@ -1,0 +1,6 @@
+
+prometheus: 
+  enabled: true 
+  serviceMonitorSelector: {} # Allows Prometheus to discover external ServiceMonitors 
+  serviceMonitorSelectorNilUsesHelmValues: false # Prevents Helm from overriding the selector
+  
