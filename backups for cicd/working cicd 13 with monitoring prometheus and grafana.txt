@@ -324,16 +324,37 @@ jobs:
             --namespace monitoring --create-namespace \
             --set grafana.service.type=LoadBalancer
 
-  
+      # - name: Install Prometheus and Grafana
+      #   run: |
+      #     helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+      #       -f catgif/values_prometheus.yaml \
+      #       --namespace default \
+      #       --set grafana.service.type=LoadBalancer
 
-# kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
-# kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+# test to see if the namespace is the problom
+      # - name: Install Prometheus and Grafana
+      #   run: |
+      #     helm install monitoring prometheus-community/kube-prometheus-stack \
+      #       --namespace monitoring --create-namespace \
+      #       --set grafana.service.type=LoadBalancer
+# test to see if the namespace is the problom
 
-# kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090
-# kubectl port-forward svc/monitoring-grafana 3000:80
+        #helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        #helm repo update
+        #helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
+        #admin 
+        #prom-operator
+        #kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+        #kubectl port-forward svc/monitoring-grafana 3000:80
+        #http://localhost:3000
+        #helm list
+
+#kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+
+#kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+
+#kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090
+#kubectl port-forward svc/monitoring-grafana 3000:80
 
 # http://localhost:9090/targets
 # http://localhost:3000
-
-# admin 
-# prom-operator
