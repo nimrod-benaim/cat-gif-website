@@ -280,6 +280,7 @@ jobs:
 
       - name: Deploy Helm Chart
         run: |
+          kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
@@ -321,7 +322,6 @@ jobs:
 
       - name: Install Prometheus and Grafana
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
           helm install monitoring prometheus-community/kube-prometheus-stack \
             --namespace default \
             --set grafana.service.type=LoadBalancer
