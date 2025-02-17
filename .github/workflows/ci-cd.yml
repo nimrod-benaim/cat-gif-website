@@ -336,7 +336,7 @@ jobs:
       #   run: |
       #     kubectl get pods -n monitoring
       #     kubectl get svc -n monitoring
-
+# test to see if the namespace is the problom
 
         #helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
         #helm repo update
@@ -344,6 +344,7 @@ jobs:
         #admin 
         #prom-operator
         #kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+        #kubectl port-forward svc/monitoring-grafana 3000:80
         #http://localhost:3000
         #helm list
 
