@@ -320,11 +320,18 @@ jobs:
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           helm repo update
 
+      # - name: Install Prometheus and Grafana
+      #   run: |
+      #     helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+      #       -f catgif/values_prometheus.yaml \
+      #       --namespace default \
+      #       --set grafana.service.type=LoadBalancer
+
       - name: Install Prometheus and Grafana
         run: |
           helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
             -f catgif/values_prometheus.yaml \
-            --namespace default \
+            --namespace monitoring --create-namespace \
             --set grafana.service.type=LoadBalancer
 
 # test to see if the namespace is the problom
