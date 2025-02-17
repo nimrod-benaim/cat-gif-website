@@ -333,11 +333,6 @@ jobs:
       #     helm install monitoring prometheus-community/kube-prometheus-stack \
       #       --namespace monitoring --create-namespace \
       #       --set grafana.service.type=LoadBalancer
-
-      # - name: Verify Installation
-      #   run: |
-      #     kubectl get pods -n monitoring
-      #     kubectl get svc -n monitoring
 # test to see if the namespace is the problom
 
         #helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
