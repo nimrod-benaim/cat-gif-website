@@ -284,12 +284,12 @@ jobs:
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=ver-2.0 \
+            --set image.tag=ver-2.1 \
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
         run: kubectl rollout restart deployment/catgif-catgif
-        
+
       # - name: time for pods to build
       #   run: |
       #     sleep 300
