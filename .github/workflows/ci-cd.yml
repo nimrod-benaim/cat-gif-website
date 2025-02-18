@@ -288,8 +288,8 @@ jobs:
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
-        run: kubectl rollout restart deployment/catgif      
-
+        run: kubectl rollout restart deployment/catgif-catgif
+        
       # - name: time for pods to build
       #   run: |
       #     sleep 300
