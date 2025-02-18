@@ -1,13 +1,17 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import os
 import random
 import mysql.connector
-from dotenv import load_dotenv  # Import dotenv
+from dotenv import load_dotenv
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
+
+# Prometheus Counter for tracking visitors
+VISITOR_COUNT = Counter('visitor_count', 'Total number of visitors')
 
 # Database configuration
 db_config = {
@@ -15,7 +19,7 @@ db_config = {
     "user": os.environ.get("DATABASE_USER", "root"),
     "password": os.environ.get("DATABASE_PASSWORD", ""),
     "database": os.environ.get("DATABASE_NAME", "catgif_db"),
-    "port": os.environ.get("DATABASE_PORT", 3306),  # Add port to db_config
+    "port": os.environ.get("DATABASE_PORT", 3306),
 }
 
 def get_db_connection():
@@ -54,10 +58,17 @@ def fetch_random_image():
 @app.route("/")
 def index():
     """Main route for displaying a random image."""
+    VISITOR_COUNT.inc()  # Increment visitor count
     image_url = fetch_random_image()
     print(f"URL sent to template: {image_url}")  # Debug log
     return render_template("index.html", url=image_url)
 
+@app.route("/metrics")
+def metrics():
+    """Expose Prometheus metrics."""
+    return Response(generate_latest(), mimetype='text/plain')
+    #return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+
 if __name__ == "__main__":
     port = os.environ.get("PORT", 5000)  # Default to 5000 if PORT is not set
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=int(port), debug=True)
