@@ -2,6 +2,8 @@ name: CI/CD
 
 on:
   push:
+    tags:
+      - "ver-*"
     branches:
       - main
   pull_request:
