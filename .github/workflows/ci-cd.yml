@@ -273,6 +273,7 @@ jobs:
       #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
       #     kubectl cluster-info  # Debugging step to verify connection # dont work bottom dose work  
 
+
       - name: Get GKE Credentials
         run: |
           gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
