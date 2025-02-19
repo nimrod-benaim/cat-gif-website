@@ -20,8 +20,9 @@ jobs:
       - name: set environment variables
         id: get-tag
         run: |
+          image_version="${GITHUB_REF#refs/tags/}"
           echo "image_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          echo tag=${{ steps.get-tag.outputs.image_version }} > .version
+          echo tag=$image_version > .version
 
 # remove 
       - name: Set up Python
@@ -61,6 +62,7 @@ jobs:
 
       - name: Install Docker Compose
         run: |
+          image_version="${GITHUB_REF#refs/tags/}"
           sudo apt-get update
           sudo apt-get install -y docker-compose
           echo "version= $image_version"
@@ -294,11 +296,12 @@ jobs:
 
       - name: Deploy Helm Chart
         run: |
+          image_version="${GITHUB_REF#refs/tags/}"
           kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=${{  steps.get-tag.outputs.image_version  }} \
+            --set image.tag=$image_version \
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
