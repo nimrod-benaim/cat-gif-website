@@ -20,7 +20,7 @@ jobs:
       - name: set environment variables
         run: |
           echo "image_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-          echo tag=${{ env.IMAGE_TAG }} > .version
+          echo tag=${{ env.image_version }} > .version
 
 # remove 
       - name: Set up Python
