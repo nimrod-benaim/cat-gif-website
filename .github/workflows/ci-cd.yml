@@ -297,7 +297,7 @@ jobs:
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=${{ env.IMAGE_TAG }} \
+            --set image.tag=${{ env.image_version }} \
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
