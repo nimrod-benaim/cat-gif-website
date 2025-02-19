@@ -9,9 +9,6 @@ on:
   pull_request:
     branches:
       - main
-env:
-  image_version: ${{ github.ref#refs/tags/ }}
-
 jobs:
   build:
     name: Build and Test
@@ -22,7 +19,9 @@ jobs:
 
       - name: set environment variables
         run: |
-          echo "tag=$image_version" > .version
+          echo "image_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          echo tag=${{ env.IMAGE_TAG }} > .version
+
 # remove 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -288,13 +287,17 @@ jobs:
           gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
           kubectl cluster-info  # Debugging step to verify connection
 
+      - name: set environment variables
+        run: |
+          echo "image_version=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Deploy Helm Chart
         run: |
           kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=$image_version \
+            --set image.tag=${{ env.IMAGE_TAG }} \
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
