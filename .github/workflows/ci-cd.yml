@@ -8,7 +8,7 @@ on:
     branches:
       - main
 env:
-  image_version: ${{ github.sha }}
+  image_version: ${{ github.ref#refs/tags/ }}
 
 jobs:
   build:
@@ -61,7 +61,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-          echo $image_version
+          echo "version= $image_version"
+          
 
       - name: Log in to DockerHub
         uses: docker/login-action@v2
