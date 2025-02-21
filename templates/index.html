@@ -2,26 +2,49 @@
   <head>
     <style type="text/css">
       body {
-        background: black;
+        background: url('https://wallpapercave.com/wp/wp12253570.jpg') no-repeat center center fixed;
+        background-size: cover;
         color: white;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
       }
       div.container {
         max-width: 500px;
-        margin: 100px auto;
+        margin: auto;
         border: 20px solid white;
         padding: 10px;
         text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
       }
       h4 {
         text-transform: uppercase;
+        font-weight: 700;
+        color: #eee;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      a {
+        color: #4fa1f1;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h4>!!!"Cat 2" Gif of the Day test 5!!!!</h4>
-      <img src="{{ url }}" alt="Cat Gif" onerror="this.onerror=null; this.src='https://th.bing.com/th/id/OIP.Z9Nm4nKDZ8KPD_CGXmNuxAHaCe?rs=1&pid=ImgDetMain';" />
-      <p><small>Courtesy: <a href="http://www.buzzfeed.com/copyranter/the-best-cat-gif-post-in-the-history-of-cat-gifs">this shit site</a></small></p>
+      <h4>Cat GIF of the Day</h4>
+      <img src="{{ url }}" alt="Cat Gif" onerror="this.onerror=null; this.src='https://via.placeholder.com/150';" />
     </div>
   </body>
 </html>
