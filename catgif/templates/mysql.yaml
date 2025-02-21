@@ -40,12 +40,20 @@ spec:
           mountPath: /var/lib/mysql
         - name: init-sql
           mountPath: /docker-entrypoint-initdb.d
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "localhost"]
+          initialDelaySeconds: 10
+          periodSeconds: 5
       volumes:
       - name: mysql-data
-        emptyDir: {}
+        persistentVolumeClaim:
+           claimName: mysql-pvc
       - name: init-sql
         configMap:
           name: {{ .Release.Name }}-init-sql-configmap
+
+
 ---
 apiVersion: v1
 kind: Service
@@ -56,3 +64,14 @@ spec:
   - port: 3306
   selector:
     app: {{ .Release.Name }}-mysql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
