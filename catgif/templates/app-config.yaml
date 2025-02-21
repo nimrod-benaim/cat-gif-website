@@ -6,4 +6,4 @@ data:
   DATABASE_HOST: {{ .Values.database.host | quote }}
   DATABASE_PORT: {{ .Values.database.port | quote }}
   DATABASE_NAME: {{ .Values.database.name | quote }}
-  PORT: "5000"
+  PORT: {{ .Values.service.targetPort | quote }}
