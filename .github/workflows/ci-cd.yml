@@ -12,7 +12,7 @@ env:
   IMAGE_VERSION: ver-${{ github.run_number }}
 
 jobs:
-  build&test:
+  build_and_test:
     name: Build and Test
     runs-on: ubuntu-22.04
     env:
@@ -108,7 +108,7 @@ jobs:
   setup-gcloud:
     name: Setup Google Cloud SDK
     runs-on: ubuntu-22.04
-    needs: build&test
+    needs: build_and_test
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
