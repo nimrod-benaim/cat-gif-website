@@ -70,7 +70,7 @@ jobs:
         run: |
           sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" docker-compose.yaml
           sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" catgif/values.yaml
-          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" .github/workflows/ci-cd.yml
+#          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" .github/workflows/ci-cd.yml
 
       - name: Build and Push Docker Image
         run: |
@@ -294,7 +294,7 @@ jobs:
           helm upgrade --install catgif ./catgif \
             --namespace default \
             --set image.repository=nimrod1/cat_gif_site_new \
-            --set image.tag=IMAGE_VERSION_PLACEHOLDER \
+            --set image.tag=${{ env.IMAGE_VERSION }} \
             --set service.type=LoadBalancer
             
       - name: Restart Deployment
