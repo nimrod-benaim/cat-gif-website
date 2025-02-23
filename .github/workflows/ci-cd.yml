@@ -44,10 +44,10 @@ jobs:
       DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
       DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
       DATABASE_USER: ${{ secrets.DATABASE_USER }}
-      DATABASE_PASSWORD: ${{ secrets.DDATABASE_PASSWORD }}
-      # DATABASE_NAME: catgif_db
-      # MYSQL_ROOT_PASSWORD: yourpassword
-      # MYSQL_DATABASE: catgif_db
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
