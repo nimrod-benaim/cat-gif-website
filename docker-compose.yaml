@@ -1,6 +1,6 @@
 services:
   catgif:
-    image: nimrod1/cat_gif_site_new:ver-2.7
+    image: nimrod1/cat_gif_site_new:IMAGE_VERSION_PLACEHOLDER
     build:
       context: .
       dockerfile: Dockerfile
