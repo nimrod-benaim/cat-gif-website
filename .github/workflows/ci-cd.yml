@@ -12,9 +12,19 @@ env:
   IMAGE_VERSION: ver-${{ github.run_number }}
 
 jobs:
-  build:
+  build and test:
     name: Build and Test
     runs-on: ubuntu-22.04
+    env:
+      PORT: 5000
+      DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+      DATABASE_USER: ${{ secrets.DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -35,22 +45,22 @@ jobs:
 #           echo "No tests implemented"  # Replace with actual test commands if any
 # # remove 
 
-  test:
-    name: Deploy to Docker Compose
-    runs-on: ubuntu-22.04
-    needs: build
-    env:
-      PORT: 5000
-      DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-      DATABASE_USER: ${{ secrets.DATABASE_USER }}
-      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  # test:
+  #   name: Deploy to Docker Compose
+  #   runs-on: ubuntu-22.04
+  #   needs: build
+  #   env:
+  #     PORT: 5000
+  #     DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  #     DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  #     DATABASE_USER: ${{ secrets.DATABASE_USER }}
+  #     DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  #     DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
@@ -76,7 +86,7 @@ jobs:
         run: |
           echo "Stage: Build Docker Image"
           docker-compose build
-
+#test
       - name: Test Application with curl
         run: |
           echo "Stage: Test Application with curl"
@@ -98,7 +108,7 @@ jobs:
   setup-gcloud:
     name: Setup Google Cloud SDK
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build and test
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
