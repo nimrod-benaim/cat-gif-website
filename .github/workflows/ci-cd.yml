@@ -19,21 +19,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-# remove 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
+# # remove 
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.8'
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+#       - name: Install Dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
 
-      - name: Lint and Test
-        run: |
-          echo "No tests implemented"  # Replace with actual test commands if any
-# remove 
+#       - name: Lint and Test
+#         run: |
+#           echo "No tests implemented"  # Replace with actual test commands if any
+# # remove 
 
   test:
     name: Deploy to Docker Compose
