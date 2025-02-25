@@ -369,8 +369,8 @@ jobs:
          helm upgrade --install loki grafana/loki-stack \
            --namespace monitoring --create-namespace \
            --set grafana.enabled=false \
-           --set loki.image.tag="3.4.0"
-           
+#           --set loki.image.tag="3.4.0"
+
       - name: Configure Loki in Grafana
         run: |
           kubectl apply -f - <<EOF
