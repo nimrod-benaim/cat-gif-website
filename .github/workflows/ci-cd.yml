@@ -365,29 +365,14 @@ jobs:
 
       - name: Install Loki
         run: |
-         helm upgrade --install loki grafana/loki-stack \
-           --namespace monitoring --create-namespace \
-           --set grafana.enabled=false \
-           --set loki.image.tag="2.9.3"
+          helm upgrade --install loki grafana/loki-stack \
+            --namespace monitoring --create-namespace \
+            -f catgif/values_loki.yaml
+
 
       - name: Configure Loki in Grafana
-        run: |
-          kubectl apply -f - <<EOF
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            name: loki-datasource
-            namespace: monitoring
-          data:
-            loki-datasource.yaml: |
-              apiVersion: 1
-              datasources:
-              - name: Loki
-                type: loki
-                access: proxy
-                url: http://loki:3100
-                isDefault: true
-          EOF
+        run: kubectl apply -f catgif/loki-datasource.yaml
+
 
       - name: Restart Grafana to Apply Config
         run: kubectl rollout restart deployment/monitoring-grafana -n monitoring

@@ -1,0 +1,6 @@
+# File: catgif/values_loki.yaml
+grafana:
+  enabled: false
+loki:
+  image:
+    tag: "2.9.3"  # Replace with "3.4.0" if that's your target version
