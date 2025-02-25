@@ -329,7 +329,6 @@ jobs:
       #     CHART_PACKAGE=$(ls charts-*.tgz)
       #     helm push $CHART_PACKAGE oci://registry-1.docker.io/nimrod1/cat_gif_site_new_helm
 
-
     #monitorng
 
       - name: Debug Kubernetes Connection
