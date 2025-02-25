@@ -369,7 +369,7 @@ jobs:
          helm upgrade --install loki grafana/loki-stack \
            --namespace monitoring --create-namespace \
            --set grafana.enabled=false \
-
+           --set loki.image.tag="2.9.3"
 
       - name: Configure Loki in Grafana
         run: |
