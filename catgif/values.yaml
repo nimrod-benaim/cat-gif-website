@@ -97,6 +97,7 @@ database:
     - "https://www.drodd.com/images10/funny-cat-gifs17.gif"
 
 
+
 ingress:
   enabled: false
   className: ""
