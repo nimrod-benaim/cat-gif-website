@@ -1,0 +1,55 @@
+services:
+  # Define the 'catgif' service, which runs the Flask application.
+  catgif:
+    # Use the specified Docker image for the service.
+    image: nimrod1/cat_gif_site_new:IMAGE_VERSION_PLACEHOLDER
+    
+    # Define the build configuration.
+    build:
+      context: .          # Use the current directory as the build context.
+      dockerfile: Dockerfile  # Specify the Dockerfile to use for building the image.
+
+    # Map the container's port 5000 to a port on the host machine.
+    ports:
+      - "${PORT:-5000}:5000"  # Use the PORT environment variable from .env, defaulting to 5000.
+
+    # Define environment variables to pass into the container.
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}   # Hostname of the database.
+      DATABASE_PORT: ${DATABASE_PORT}   # Port the database runs on.
+      DATABASE_USER: ${DATABASE_USER}   # Database username.
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD} # Database password.
+      DATABASE_NAME: ${DATABASE_NAME}   # Name of the database.
+      PORT: ${PORT}   # Pass the PORT variable to the container.
+
+    # Specify dependencies: ensure the 'mysql' service starts before this service.
+    depends_on:
+      - mysql
+
+    # Restart the service automatically if it crashes or is stopped.
+    restart: always
+
+  # Define the 'mysql' database service.
+  mysql:
+    image: mysql:8.0  # Use the official MySQL 8.0 image.
+    container_name: mysql  # Set the container name to 'mysql'.
+
+    # Map MySQL's default port 3306 to port 3307 on the host to prevent conflicts.
+    ports:
+      - "3307:3306"
+
+    # Define environment variables for MySQL configuration.
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # Root password for MySQL.
+      MYSQL_DATABASE: ${MYSQL_DATABASE}   # Name of the initial database.
+      MYSQL_USER: ${DATABASE_USER}   # MySQL username (same as app config).
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD} # MySQL password (same as app config).
+
+    # Mount volumes for persistent data storage.
+    volumes:
+      - db_data:/var/lib/mysql  # Store MySQL data in a persistent volume.
+      - ./init-scripts:/docker-entrypoint-initdb.d  # Mount initialization scripts to run on startup.
+
+# Define named volumes to persist MySQL data across container restarts.
+volumes:
+  db_data:

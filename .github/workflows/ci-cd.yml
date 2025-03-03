@@ -29,39 +29,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-# # remove 
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.8'
-
-#       - name: Install Dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install -r requirements.txt
-
-#       - name: Lint and Test
-#         run: |
-#           echo "No tests implemented"  # Replace with actual test commands if any
-# # remove 
-
-  # test:
-  #   name: Deploy to Docker Compose
-  #   runs-on: ubuntu-22.04
-  #   needs: build
-  #   env:
-  #     PORT: 5000
-  #     DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-  #     DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-  #     DATABASE_USER: ${{ secrets.DATABASE_USER }}
-  #     DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-  #     DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-  #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-  #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
-
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
@@ -80,7 +47,6 @@ jobs:
         run: |
           sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" docker-compose.yaml
           sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" catgif/values.yaml
-#          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" .github/workflows/ci-cd.yml
 
       - name: Build and Push Docker Image
         run: |
@@ -174,14 +140,6 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-
-# #       name: Install GKE Auth Plugin & Ensures kubectl uses the new plugin
-#       - name: Install and Configure GKE Auth Plugin
-#         run: |
-#           gcloud components install gke-gcloud-auth-plugin
-#           export USE_GKE_GCLOUD_AUTH_PLUGIN=True  
-
-
       - name: Install GKE Auth Plugin
         run: |
           gcloud components install gke-gcloud-auth-plugin
@@ -190,19 +148,6 @@ jobs:
 
       - name: Verify Plugin Installation
         run: gke-gcloud-auth-plugin --version
-
-      # - name: Install kubectl (Official Google Version)
-      #   run: |
-      #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-      #     chmod +x kubectl
-      #     sudo mv kubectl /usr/local/bin/
-
-      # - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
-      #   run: |
-      #     gcloud auth list    
-      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
-      #     kubectl version --client
-      #     kubectl cluster-info
 
   deploy:
     name: Deploy to GKE with Terraform
@@ -221,13 +166,6 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
           export_default_credentials: true
-
-      # - name: Get GKE Credentials # 🔹"gcloud auth list" is for debugging, to confirm authentication
-      #   run: |
-      #     gcloud auth list
-      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
-
-
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -277,22 +215,6 @@ jobs:
           terraform plan
           terraform apply -auto-approve 
 
-      # - name: Apply Kubernetes Manifests
-      #   run: |
-      #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
-      #     kubectl apply -f k8s/
-    #temp
-      - name: Debug GKE Cluster List
-        run: |
-          gcloud container clusters list --region=${{ secrets.GKE_CLUSTER_REGION }}
-    #temp
-
-      # - name: Get GKE Credentials
-      #   run: |
-      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
-      #     kubectl cluster-info  # Debugging step to verify connection # dont work bottom dose work  
-
-
       - name: Get GKE Credentials
         run: |
           gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
@@ -310,26 +232,7 @@ jobs:
       - name: Restart Deployment
         run: kubectl rollout restart deployment/catgif-catgif
 
-      # - name: time for pods to build
-      #   run: |
-      #     sleep 300
-
-
-
-      # - name: Log in to Docker Hub
-      #   run: |
-      #     echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login registry-1.docker.io --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
-      # - name: Package Helm Chart
-      #   run: |
-      #     helm package ./catgif
-
-      # - name: Push to Docker Hub
-      #   run: |
-      #     CHART_PACKAGE=$(ls charts-*.tgz)
-      #     helm push $CHART_PACKAGE oci://registry-1.docker.io/nimrod1/cat_gif_site_new_helm
-
-    #monitorng
+#monitorng
 
       - name: Debug Kubernetes Connection
         run: kubectl get nodes

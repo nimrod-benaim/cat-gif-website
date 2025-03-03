@@ -1,0 +1,111 @@
+# Import the Flask class, render_template for rendering HTML templates, and Response for HTTP responses.
+from flask import Flask, render_template, Response
+
+# Import os module to interact with the operating system (e.g., to access environment variables).
+import os
+
+# Import random module to allow random selections (used to pick a random image).
+import random
+
+# Import mysql.connector to interact with a MySQL database.
+import mysql.connector
+
+# Import load_dotenv to load environment variables from a .env file.
+from dotenv import load_dotenv
+
+# Import Prometheus client components:
+# Counter: To count events (like visitor hits),
+# generate_latest: To produce the latest metrics data,
+# CONTENT_TYPE_LATEST: To set the correct MIME type for metrics.
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+
+# Load environment variables from a .env file into the environment.
+load_dotenv()
+
+# Create a Flask web application instance.
+app = Flask(__name__)
+
+# Create a Prometheus Counter to track the total number of visitors.
+VISITOR_COUNT = Counter('visitor_count', 'Total number of visitors')
+
+# Define the database configuration using environment variables, with defaults if they are not set.
+db_config = {
+    "host": os.environ.get("DATABASE_HOST", "localhost"),         # Database host; default is 'localhost'.
+    "user": os.environ.get("DATABASE_USER", "root"),                # Database user; default is 'root'.
+    "password": os.environ.get("DATABASE_PASSWORD", ""),            # Database password; default is an empty string.
+    "database": os.environ.get("DATABASE_NAME", "catgif_db"),       # Database name; default is 'catgif_db'.
+    "port": os.environ.get("DATABASE_PORT", 3306),                  # Database port; default is 3306.
+}
+
+# Function to establish a connection to the MySQL database.
+def get_db_connection():
+    """Establish a database connection."""
+    try:
+        # Attempt to create a database connection using the provided configuration.
+        connection = mysql.connector.connect(**db_config)
+        print("Database connection successful.")
+        return connection  # Return the connection object if successful.
+    except mysql.connector.Error as err:
+        # Print an error message if the connection fails.
+        print(f"Error connecting to database: {err}")
+        return None  # Return None to indicate failure.
+
+# Function to fetch a random image URL from the database.
+def fetch_random_image():
+    """Fetch a random image URL from the database."""
+    # Get a database connection.
+    connection = get_db_connection()
+    if connection:
+        # Create a cursor to execute database queries.
+        cursor = connection.cursor()
+        try:
+            # Execute SQL query to retrieve all image URLs from the 'images' table.
+            cursor.execute("SELECT url FROM images")
+            # Fetch all rows returned by the query.
+            images = cursor.fetchall()
+            print(f"Fetched images from DB: {images}")  # Debug log: show all fetched images.
+            if images:
+                # Randomly select one image URL from the fetched results.
+                selected_image = random.choice(images)[0]
+                print(f"Selected image URL: {selected_image}")  # Debug log: show the selected image URL.
+                return selected_image  # Return the chosen image URL.
+            else:
+                # Log and return a placeholder image URL if no images are found.
+                print("No images found in database.")
+                return "https://via.placeholder.com/150"
+        finally:
+            # Always close the cursor and the connection after the query.
+            cursor.close()
+            connection.close()
+    else:
+        # Log the failure to connect and return a placeholder image URL.
+        print("Database connection failed.")
+        return "https://via.placeholder.com/150"
+
+# Define the root route ("/") of the web application.
+@app.route("/")
+def index():
+    """Main route for displaying a random image."""
+    # Increment the visitor counter each time the page is accessed.
+    VISITOR_COUNT.inc()
+    # Fetch a random image URL from the database.
+    image_url = fetch_random_image()
+    print(f"URL sent to template: {image_url}")  # Debug log: display the URL sent to the HTML template.
+    # Render the 'index.html' template and pass the image URL as a variable named 'url'.
+    return render_template("index.html", url=image_url)
+
+# Define a route ("/metrics") to expose Prometheus metrics.
+@app.route("/metrics")
+def metrics():
+    """Expose Prometheus metrics."""
+    # Generate the latest metrics data and return it with a plain text MIME type.
+    return Response(generate_latest(), mimetype='text/plain')
+    # Alternative response formatting is commented out:
+    # return generate_latest(), 200, {"Content-Type": CONTENT_TYPE_LATEST}
+
+# Only run the app if this script is executed directly (not imported as a module).
+if __name__ == "__main__":
+    # Get the port from the environment variables or default to 5000 if not set.
+    port = os.environ.get("PORT", 5000)
+    # Run the Flask web server on all network interfaces with debug mode enabled.
+    app.run(host="0.0.0.0", port=int(port), debug=True)

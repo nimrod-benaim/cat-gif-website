@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <style type="text/css">
+      /* Set the background image for the entire page */
+      body {
+        background: url('https://i.pinimg.com/originals/23/f2/b3/23f2b35d7dea7e3b1164e2eaed2c5e0c.jpg') no-repeat center center fixed;
+        background-size: cover; /* Ensure the image covers the entire screen */
+        color: white; /* Set text color to white for readability */
+        font-family: Arial, sans-serif; /* Use Arial or a sans-serif font */
+        display: flex; /* Enable flexbox for centering content */
+        justify-content: center; /* Center content horizontally */
+        align-items: center; /* Center content vertically */
+        height: 100vh; /* Set the height of the body to full viewport height */
+        margin: 0; /* Remove default margin */
+      }
+
+      /* Style for the content container */
+      div.container {
+        max-width: 500px; /* Limit the width of the container */
+        margin: auto; /* Center the container */
+        border: 20px solid rgb(47, 43, 43); /* Add a thick border */
+        padding: 10px; /* Add some padding inside the container */
+        text-align: center; /* Center text inside the container */
+        background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+        border-radius: 10px; /* Round the corners of the container */
+      }
+
+      /* Style for the heading */
+      h4 {
+        text-transform: uppercase; /* Convert text to uppercase */
+        font-weight: 700; /* Make the font bold */
+        color: #eee; /* Light gray color */
+      }
+
+      /* Style for the cat image */
+      img {
+        max-width: 100%; /* Ensure image doesn't overflow the container */
+        height: auto; /* Maintain aspect ratio */
+        border-radius: 10px; /* Round the corners of the image */
+        margin-bottom: 20px; /* Add space below the image */
+      }
+
+      /* Style for links */
+      a {
+        color: #4fa1f1; /* Light blue color for links */
+        text-decoration: none; /* Remove underline */
+      }
+
+      /* Add underline effect when hovering over a link */
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h4>Cat GIF of the Day</h4>
+      <!-- Display the cat GIF; the URL is dynamically provided by Flask -->
+      <img 
+        src="{{ url }}" 
+        alt="Cat Gif" 
+        onerror="this.onerror=null; this.src='https://th.bing.com/th/id/OIP.Z9Nm4nKDZ8KPD_CGXmNuxAHaCe?rs=1&pid=ImgDetMain';" 
+      />
+      <!-- If the image fails to load, the onerror attribute replaces it with a default image -->
+    </div>
+  </body>
+</html>
