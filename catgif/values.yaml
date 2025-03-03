@@ -81,6 +81,21 @@ database:
     - "https://www.gifcen.com/wp-content/uploads/2021/06/meme-gif-9.gif"
     - "https://media.tenor.com/NmjGWE3U1-8AAAAd/cat.gif"
     - "https://media1.tenor.com/images/dd6f569c7da8fda9b0586c6080be8574/tenor.gif?itemid=16310120"
+    - "https://media.tenor.com/o9owbF_iALAAAAAC/sad-cat.gif"
+    - "https://media.tenor.com/i8A6KxLGQZEAAAAC/cute-cat.gif"
+    - "https://c.tenor.com/yOzaaX7UQw8AAAAd/cat-cute.gif"
+    - "https://i.pinimg.com/originals/e2/7e/5e/e27e5e9c64d69ccd201528c0444e626e.gif"
+    - "https://i.pinimg.com/originals/9f/5d/31/9f5d31768d5db6ec657c17be58355a9e.gif"
+    - "https://i.pinimg.com/originals/84/0b/b4/840bb47b86b03cb98610a3862ade4972.gif"
+    - "https://cdn.stickers.gg/stickers/4209-mocha-cat-5.gif"
+    - "https://cdn.stickers.gg/stickers/5973-mocha-cat-8.gif"
+    - "https://media.tenor.com/LLLRvDwzXuMAAAAC/bongo-cat-cat-meme.gif"
+    - "https://3.bp.blogspot.com/-7mdL3BahEYg/VkzN5T46pGI/AAAAAAABgr4/jOID7NXkdGE/s1600/funny-cat-gifs-181-09.gif"
+    - "https://newfastuff.com/wp-content/uploads/2019/06/2BCzMVE.png"
+    - "https://media1.tenor.com/images/dee2f9f29572393e39e886ffab9c18ec/tenor.gif?itemid=11663195"
+    - "https://media.tenor.com/4yEuW6bbRo0AAAAi/gato.gif"
+    - "https://www.drodd.com/images10/funny-cat-gifs17.gif"
+
 
 ingress:
   enabled: false
