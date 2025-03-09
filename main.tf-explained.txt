@@ -1,0 +1,54 @@
+# Configure the Google Cloud provider
+provider "google" {
+  # Set the GCP project ID using the variable defined below
+  project     = var.gcp_project_id
+  # Read the credentials from the file path specified by the variable "gcp_credentials_path"
+  credentials = file(var.gcp_credentials_path)
+  # Set the default zone where resources will be created
+  zone        = "us-central1-a"
+}
+
+# Define a variable to hold the GCP project ID
+variable "gcp_project_id" {
+  description = "gcp project id"  # Description of this variable
+  type        = string            # Expect a string value
+}
+
+# Define a variable to hold the path to the GCP credentials file
+variable "gcp_credentials_path" {
+  description = "gcp_credentials_path"  # Description of this variable
+  type        = string                  # Expect a string value representing a file path
+}
+
+# Create a Google Kubernetes Engine (GKE) cluster
+resource "google_container_cluster" "primary" {
+  # Name the cluster "cat-gif-cluster"
+  name     = "cat-gif-cluster"
+  # Specify the location (zone) for the cluster
+  location = "us-central1-a"
+
+  # Do not create the default node pool; we'll define our own node pool later
+  remove_default_node_pool = true
+  # This field is required when a default node pool is not created, but its value is not used
+  initial_node_count       = 1
+}
+
+# Create a custom node pool for the GKE cluster
+resource "google_container_node_pool" "primary_nodes" {
+  # Name of the node pool
+  name       = "node-pool"
+  # Specify the location (zone) for the node pool
+  location   = "us-central1-a"
+  # Associate this node pool with the previously created cluster using its name
+  cluster    = google_container_cluster.primary.name
+  # Set the number of nodes in this node pool
+  node_count = 1
+
+  # Configuration for the nodes within the node pool
+  node_config {
+    # Define the machine type for the nodes (controls CPU, memory, etc.)
+    machine_type = "e2-standard-2"
+    # Specify the type of disk to be used for node storage
+    disk_type = "pd-standard"
+  }
+}

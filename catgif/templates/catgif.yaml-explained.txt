@@ -1,0 +1,88 @@
+# -----------------------------------------------
+# Kubernetes Deployment for the catgif application
+# -----------------------------------------------
+apiVersion: apps/v1          # Use the apps/v1 API version for deployments
+kind: Deployment             # This resource defines a Deployment, which manages a ReplicaSet and pods
+metadata:
+  # Dynamically set the name using Helm templating by appending "-catgif" to the release name
+  name: {{ .Release.Name }}-catgif  
+spec:
+  # Number of pod replicas to run, defined by the replicaCount value from values.yaml
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      # Pods matching this label will be managed by this Deployment
+      app: {{ .Release.Name }}-catgif
+  template:
+    metadata:
+      labels:
+        # Label applied to pods so the Deployment can identify them
+        app: {{ .Release.Name }}-catgif
+    spec:
+      containers:
+      - name: catgif  # Name of the container within the pod
+        # Set the container image using the repository and tag values from values.yaml
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: Always  # Always pull the latest image when starting a pod
+        ports:
+        - containerPort: 5000  # Expose port 5000 inside the container where the app listens
+        env:
+        # Environment variable DATABASE_HOST is sourced from a ConfigMap
+        - name: DATABASE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-app-config  # Name of the ConfigMap containing DATABASE_HOST
+              key: DATABASE_HOST  # Key within the ConfigMap for the host value
+        # Environment variable DATABASE_PORT is sourced from a ConfigMap
+        - name: DATABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-app-config  # ConfigMap providing DATABASE_PORT
+              key: DATABASE_PORT
+        # Environment variable DATABASE_NAME is sourced from a ConfigMap
+        - name: DATABASE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-app-config  # ConfigMap providing DATABASE_NAME
+              key: DATABASE_NAME
+        # Environment variable PORT is sourced from a ConfigMap
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-app-config  # ConfigMap providing PORT value
+              key: PORT
+        # Environment variable DATABASE_USER is sourced from a Secret to keep sensitive data secure
+        - name: DATABASE_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-app-secrets  # Secret containing the DATABASE_USER value
+              key: DATABASE_USER
+        # Environment variable DATABASE_PASSWORD is sourced from a Secret
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-app-secrets  # Secret containing the DATABASE_PASSWORD value
+              key: DATABASE_PASSWORD
+
+# -----------------------------------------------
+# Kubernetes Service for exposing the catgif application
+# -----------------------------------------------
+---
+apiVersion: v1  # Use the core/v1 API version for Service resources
+kind: Service  # This resource defines a Service to expose the deployment
+metadata:
+  # Dynamically generate the service name by appending "-catgif-service" to the release name
+  name: {{ .Release.Name }}-catgif-service
+  labels: 
+    app: catgif-catgif  # Static label used for the service; could be templated for consistency if needed
+spec:
+  # Selector determines which pods receive the traffic; must match the labels on the Deployment pods
+  selector:
+    app: {{ .Release.Name }}-catgif
+  # Set the service type based on values.yaml (e.g., LoadBalancer, ClusterIP)
+  type: {{ .Values.service.type }}
+  ports:
+    - protocol: TCP  # Define the protocol for the service port
+      port: {{ .Values.service.port }}  # External port that the service exposes
+      name: http  # Name for this port configuration
+      targetPort: {{ .Values.service.targetPort }}  # Port on the container that receives traffic

@@ -1,10 +1,10 @@
-1. the env is exposed in the Pipeline -done 
-2. there are no fallback variables in the docker-compose -not importent
-3. in the cicd Lint and test the code is empty
-4. need to add steps in the cicd -not importent
-5. need to add echo in cicd printing the step into the log -not importent
-6. nned to make the test and build stages seperte -done 
+1. the env is exposed in the Pipeline                                                                                                -done 
+2. there are no fallback variables in the docker-compose                                                                             -not importent
+3. in the cicd Lint and test the code is empty                                                                                       -done
+4. need to add steps in the cicd                                                                                                     -not importent
+5. need to add echo in cicd printing the step into the log                                                                           -not importent
+6. nned to make the test and build stages seperte                                                                                    -done 
 7. need to remove ports in the D-C.yaml in the mysql part. avici said we dont need it and sould remove it 
-8. in the cicd i have a temporary fix with the "Authorize GitHub Actions Runner IP". i need to use a aws ssm to fix this. -not relevent anymore
+8. in the cicd i have a temporary fix with the "Authorize GitHub Actions Runner IP". i need to use a aws ssm to fix this.            -not relevent anymore
 9. values.yaml has passwords and usernames out in the open, make sure to hide them later for securety
-10. the helm files dont get saved to a defent repo
+10. the helm files dont get saved to a defent repo                                                                                   -not importent

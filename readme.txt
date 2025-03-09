@@ -1,76 +1,111 @@
-name: CI/CD Pipeline
+# Project Overview
+This project is a Flask-based web application deployed on a Kubernetes cluster using Helm and managed with Terraform. 
+The application includes a visitor counter, monitored using Prometheus and visualized with Grafana. 
+The CI/CD pipeline is built with GitHub Actions, automating the deployment process on Google Kubernetes Engine (GKE).
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+---
 
-jobs:
-  build-test-deploy:
-    runs-on: ubuntu-latest
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Setup Instructions](#setup-instructions)
+- [CI/CD Workflow](#cicd-workflow)
+- [Deployment Steps](#deployment-steps)
+- [Security Considerations](#security-considerations)
+- [Monitoring Setup](#monitoring-setup)
 
-    env:
-      MYSQL_ROOT_PASSWORD: yourpassword
-      MYSQL_DATABASE: catgif_db
-      DATABASE_USER: catgif_user
-      DATABASE_PASSWORD: catgif_password
+---
 
+## Setup Instructions
+### Prerequisites
+Ensure you have the following installed:
+- **Terraform** (for infrastructure management)
+- **Google Cloud SDK** (for GKE authentication)
+- **Docker** (for containerization)
+- **Helm** (for Kubernetes deployments)
+- **Kubectl** (for interacting with the Kubernetes cluster)
+- **GitHub Actions** (for CI/CD automation)
 
-    steps:
-    # Checkout the code
-    - name: Checkout Code
-      uses: actions/checkout@v3
+### Initial Setup
+1. **Clone the Repository**
+   ```sh
+   git clone <repository_url>
+   cd <project_directory>
+   ```
 
-    # Set up Docker
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
+2. **Authenticate with Google Cloud**
+   ```sh
+   gcloud auth login
+   gcloud auth application-default login
+   ```
 
-    # Install Docker Compose
-    - name: Install Docker Compose
-      run: |
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-        docker-compose --version
+3. **Initialize Terraform & Deploy Infrastructure**
+   ```sh
+   cd terraform/
+   terraform init
+   terraform apply -auto-approve
+   ```
 
-    # Build the Docker image
-    - name: Build Docker Image
-      run: docker-compose build
-      env:
-        DOCKER_BUILDKIT: 1
+4. **Set Up Kubernetes Context**
+   ```sh
+   gcloud container clusters get-credentials <cluster_name> --region <region>
+   ```
 
-    # Run the containers
-    - name: Start Containers
-      run: docker-compose up -d
+5. **Deploy the Application with Helm**
+   ```sh
+   cd helm/
+   helm install catgif ./
+   ```
 
-    # Wait for services to be ready
-    - name: Wait for Database
-      run: |
-        echo "Waiting for database to start..."
-        for i in {1..30}; do
-          nc -z mysql 3306 && echo "Database is ready!" && exit 0
-          echo "Waiting..."
-          sleep 5
-        done
-        exit 1
+---
 
-    # Run tests (replace with your actual test commands)
-    - name: Run Tests
-      run: |
-        echo "Running tests..."
-        curl -f http://localhost:5000 || exit 1
-        echo "Tests passed!"
+## CI/CD Workflow
+This project uses **GitHub Actions** for CI/CD automation. The workflow includes:
+1. **Code Push & Pull Requests**
+   - On push, the workflow triggers automated testing.
+2. **Docker Image Build & Push**
+   - The Flask app is built into a Docker image and pushed to Docker Hub.
+3. **Terraform Execution**
+   - Ensures that the GKE infrastructure is correctly provisioned.
+4. **Helm Deployment**
+   - Deploys the latest application version to the Kubernetes cluster.
 
-    # Deploy (example: push to Docker Hub)
-    - name: Push Docker Image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: nimrod1/cat_gif_site_new:ver-2.0 # הנה #
+---
 
-    # Cleanup
-    - name: Cleanup
-      run: docker-compose down
+## Deployment Steps
+1. **Push Code to GitHub** → Triggers CI/CD workflow.
+2. **GitHub Actions Runs Pipeline** → Builds, pushes, and deploys the application.
+3. **Helm Deploys the App on GKE** → Kubernetes applies the latest updates.
+4. **Monitor Deployment via Grafana** → Visualize app performance and logs.
+
+---
+
+## Security Considerations
+- **Secrets Management**: Application secrets (DB credentials) are stored securely in Kubernetes Secrets.
+- **IAM Roles**: Least privilege access is enforced using Google Cloud IAM roles.
+- **Image Security**: Docker images are scanned for vulnerabilities before deployment.
+- **Network Policies**: Firewalls restrict external access to essential services only.
+
+---
+
+## Monitoring Setup
+This project integrates Prometheus and Grafana for monitoring:
+1. **Prometheus**: Collects metrics from the Flask app (`/metrics` endpoint).
+2. **Loki**: Logs aggregation for better debugging.
+3. **Grafana**: Visualizes Prometheus metrics.
+
+To access Grafana:
+```sh
+kubectl port-forward service/grafana 3000:80 -n monitoring
+```
+Then, open `http://localhost:3000` in your browser.
+
+---
+
+## Conclusion
+This project automates infrastructure management, deployment, and monitoring using a robust CI/CD pipeline. 
+Terraform ensures scalable infrastructure, 
+Helm manages Kubernetes applications, 
+and Prometheus/Grafana provides real-time observability.
+
+For any issues, open a GitHub Issue or reach out to the maintainers.
+

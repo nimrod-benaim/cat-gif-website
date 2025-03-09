@@ -1,0 +1,7 @@
+prometheus: 
+  enabled: true  # Enable Prometheus monitoring. Setting this to true activates Prometheus within the chart.
+  serviceMonitorSelector: {}  # Label selector for discovering external ServiceMonitor resources.
+                             # An empty selector means Prometheus will consider all ServiceMonitors without filtering.
+  serviceMonitorSelectorNilUsesHelmValues: false  
+  # This setting prevents Helm from overriding the serviceMonitorSelector with its default values when the selector is nil.
+  # It gives you control over the ServiceMonitor selection by ensuring that your specified (or empty) selector is used.

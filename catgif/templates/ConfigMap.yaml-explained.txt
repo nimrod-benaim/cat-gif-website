@@ -1,0 +1,22 @@
+apiVersion: v1             # Specifies the API version for the ConfigMap resource
+kind: ConfigMap            # Declares that this resource is a ConfigMap, which holds configuration data
+metadata:
+  # Dynamically generate the name of the ConfigMap by appending "-init-sql-configmap" to the Helm release name
+  name: {{ .Release.Name }}-init-sql-configmap  
+data:
+  # Define a key named "init.sql" whose value is a multi-line SQL script
+  init.sql: |             
+    -- Use the target database
+    CREATE DATABASE IF NOT EXISTS {{ .Values.database.name }};  # Create the database if it doesn't exist; uses the database name from values.yaml
+    USE {{ .Values.database.name }};  # Select the created (or existing) database
+
+    -- Create the images table
+    CREATE TABLE IF NOT EXISTS images (  # Create the "images" table if it doesn't already exist
+        id INT AUTO_INCREMENT PRIMARY KEY,  # 'id' column: auto-incrementing primary key
+        url VARCHAR(255) NOT NULL           # 'url' column: stores image URLs, cannot be null
+    );
+
+    -- Insert initial data
+    {{- range .Values.database.seedData }}   # Loop through each item in the seedData list from values.yaml
+    INSERT INTO images (url) VALUES ("{{ . }}");  # Insert an image URL into the images table for each seed data entry
+    {{- end }}   # End of the loop

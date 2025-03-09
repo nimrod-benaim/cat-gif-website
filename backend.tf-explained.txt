@@ -1,0 +1,9 @@
+terraform {
+  # Configure the backend for Terraform state storage using Google Cloud Storage (GCS)
+  backend "gcs" {
+    # Specify the name of the GCS bucket where the Terraform state will be stored
+    bucket  = "catgifbuckets"
+    # Define a prefix (similar to a folder path) within the bucket for the state file
+    prefix  = "terraform/state"
+  }
+}

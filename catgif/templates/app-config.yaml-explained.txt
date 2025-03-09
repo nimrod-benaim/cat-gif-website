@@ -1,0 +1,26 @@
+# Specify the Kubernetes API version for the ConfigMap resource.
+apiVersion: v1  # This is the core API version for ConfigMap objects in Kubernetes.
+
+# Define the kind of Kubernetes object.
+kind: ConfigMap  # This declares that the resource is a ConfigMap, used to store non-confidential data in key-value pairs.
+
+metadata:
+  # The name of the ConfigMap is dynamically generated using Helm templating.
+  name: {{ .Release.Name }}-app-config  
+  # In this case, it concatenates the Helm release name with "-app-config" to form the ConfigMap name.
+
+data:
+  # The following key-value pairs are configuration settings that will be used by the application.
+  
+  # DATABASE_HOST is set to the value of 'database.host' from the Helm values file,
+  # and the 'quote' function ensures the value is rendered as a quoted string.
+  DATABASE_HOST: {{ .Values.database.host | quote }}
+  
+  # DATABASE_PORT is set to the value of 'database.port' from the Helm values file, quoted.
+  DATABASE_PORT: {{ .Values.database.port | quote }}
+  
+  # DATABASE_NAME is set to the value of 'database.name' from the Helm values file, quoted.
+  DATABASE_NAME: {{ .Values.database.name | quote }}
+  
+  # PORT is set to the target port defined in the service configuration in the Helm values file, quoted.
+  PORT: {{ .Values.service.targetPort | quote }}

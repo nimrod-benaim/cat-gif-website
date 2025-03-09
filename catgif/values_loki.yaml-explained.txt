@@ -1,0 +1,9 @@
+# File: catgif/values_loki.yaml
+
+grafana:
+  enabled: false  # Disables Grafana integration in this configuration; set to true if you want Grafana to be enabled for Loki dashboards
+
+loki:
+  image:
+    tag: "2.9.3"  # Specifies the version tag for the Loki Docker image.
+                  # If you wish to use a different version, for example "3.4.0", replace "2.9.3" with "3.4.0".

@@ -1,0 +1,378 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  # Dynamically generate a version tag for each run, e.g. ver-12, ver-13, etc.
+  IMAGE_VERSION: ver-${{ github.run_number }}
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-22.04
+    env:
+      PORT: 5000
+      DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+      DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+      DATABASE_USER: ${{ secrets.DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+# # remove 
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.8'
+
+#       - name: Install Dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+
+#       - name: Lint and Test
+#         run: |
+#           echo "No tests implemented"  # Replace with actual test commands if any
+# # remove 
+
+  # test:
+  #   name: Deploy to Docker Compose
+  #   runs-on: ubuntu-22.04
+  #   needs: build
+  #   env:
+  #     PORT: 5000
+  #     DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  #     DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  #     DATABASE_USER: ${{ secrets.DATABASE_USER }}
+  #     DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  #     DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  #     MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  #     MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Inject dynamic version into files
+        run: |
+          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" docker-compose.yaml
+          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" catgif/values.yaml
+#          sed -i "s|IMAGE_VERSION_PLACEHOLDER|${IMAGE_VERSION}|g" .github/workflows/ci-cd.yml
+
+      - name: Build and Push Docker Image
+        run: |
+          echo "Stage: Build Docker Image"
+          docker-compose build
+#test
+      - name: Test Application with curl
+        run: |
+          echo "Stage: Test Application with curl"
+          docker-compose up -d
+          sleep 10
+          curl -f http://localhost:5000 && echo "Curl test worked!" || (echo "Curl test failed!" && exit 1)
+          docker-compose down
+
+      - name: Push Docker Image
+        run: |
+          echo "Stage: Push Docker Image"
+          docker-compose push 
+
+      - name: Deploy Application
+        run: |
+          docker-compose down
+          docker-compose up -d
+
+  setup-gcloud:
+    name: Setup Google Cloud SDK
+    runs-on: ubuntu-22.04
+    needs: build_and_test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 🔹 Install Google Cloud SDK (MUST come before authentication) // Ensures gcloud CLI is available
+      - name: Install Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY_2 }}
+          export_default_credentials: true
+
+      # 🔹 Verify installation to ensure gcloud is available // Confirms that gcloud is installed correctly
+      - name: Verify gcloud Installation
+        run: gcloud --version
+
+      # 🔹 Authenticate with Google Cloud using the service account // Ensures a valid active account is used before running any gcloud commands
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+
+      # 🔹 Confirm authentication was successful // fix for "You do not currently have an active account selected" error
+      - name: Confirm Active Account
+        run: gcloud auth list --format="value(account)"
+
+      # 🔹 Set the correct project and region AFTER authentication // Ensures gcloud recognizes the credentials before setting configurations
+      - name: Set Project and Region
+        run: |
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud config set compute/region ${{ secrets.GKE_CLUSTER_REGION }}
+
+      # 🔹 Debugging step to confirm authentication and configuration // Prints current GCP settings
+      - name: Debug GCP Config
+        run: gcloud config list
+
+
+  configure-kubectl:
+    name: Configure kubectl for GKE
+    runs-on: ubuntu-22.04
+    needs: setup-gcloud
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+          export_default_credentials: true
+
+      - name: Install kubectl (Google Cloud)
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          kubectl version --client
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+
+# #       name: Install GKE Auth Plugin & Ensures kubectl uses the new plugin
+#       - name: Install and Configure GKE Auth Plugin
+#         run: |
+#           gcloud components install gke-gcloud-auth-plugin
+#           export USE_GKE_GCLOUD_AUTH_PLUGIN=True  
+
+
+      - name: Install GKE Auth Plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+          echo "export USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Verify Plugin Installation
+        run: gke-gcloud-auth-plugin --version
+
+      # - name: Install kubectl (Official Google Version)
+      #   run: |
+      #     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      #     chmod +x kubectl
+      #     sudo mv kubectl /usr/local/bin/
+
+      # - name: Configure kubectl   # 🔹"gcloud auth list" is for debugging, to confirm authentication
+      #   run: |
+      #     gcloud auth list    
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+      #     kubectl version --client
+      #     kubectl cluster-info
+
+  deploy:
+    name: Deploy to GKE with Terraform
+    runs-on: ubuntu-22.04
+    needs: configure-kubectl
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create GCP Credentials File
+        run: |
+          echo '${{ secrets.GCP_SA_KEY_2 }}' > gcp-key.json
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY_2 }}
+          export_default_credentials: true
+
+      # - name: Get GKE Credentials # 🔹"gcloud auth list" is for debugging, to confirm authentication
+      #   run: |
+      #     gcloud auth list
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+
+
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Install GKE Auth Plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+
+      - name: Verify Plugin Installation
+        run: gke-gcloud-auth-plugin --version
+
+
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+          chmod +x get_helm.sh
+          ./get_helm.sh
+
+      - name: Verify Helm Installation
+        run: helm version
+
+
+
+      - name: Apply Terraform Plan
+        env:
+          TF_VAR_database_host: ${{ secrets.DATABASE_HOST }}
+          TF_VAR_database_port: ${{ secrets.DATABASE_PORT }}
+          TF_VAR_database_user: ${{ secrets.DATABASE_USER }}
+          TF_VAR_database_password: ${{ secrets.DATABASE_PASSWORD }}
+          TF_VAR_database_name: ${{ secrets.DATABASE_NAME }}
+          TF_VAR_mysql_root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          TF_VAR_key_pair_name: ${{ secrets.KEY_PAIR_NAME }}
+          TF_VAR_iam_user_name: ${{ secrets.IAM_USER_NAME }}
+          TF_VAR_mysql_database: ${{ secrets.MYSQL_DATABASE }}
+          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_gke_cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
+          TF_VAR_gke_cluster_region: ${{ secrets.GKE_CLUSTER_REGION }}
+          TF_VAR_gcp_credentials_path: gcp-key.json
+        run: |
+          terraform plan
+          terraform apply -auto-approve 
+
+      # - name: Apply Kubernetes Manifests
+      #   run: |
+      #     gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
+      #     kubectl apply -f k8s/
+    #temp
+      - name: Debug GKE Cluster List
+        run: |
+          gcloud container clusters list --region=${{ secrets.GKE_CLUSTER_REGION }}
+    #temp
+
+      # - name: Get GKE Credentials
+      #   run: |
+      #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER_NAME }} --region ${{ secrets.GKE_CLUSTER_REGION }}
+      #     kubectl cluster-info  # Debugging step to verify connection # dont work bottom dose work  
+
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials cat-gif-cluster --zone us-central1-a
+          kubectl cluster-info  # Debugging step to verify connection
+
+      - name: Deploy Helm Chart
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+          helm upgrade --install catgif ./catgif \
+            --namespace default \
+            --set image.repository=nimrod1/cat_gif_site_new \
+            --set image.tag=${{ env.IMAGE_VERSION }} \
+            --set service.type=LoadBalancer
+            
+      - name: Restart Deployment
+        run: kubectl rollout restart deployment/catgif-catgif
+
+      # - name: time for pods to build
+      #   run: |
+      #     sleep 300
+
+
+
+      # - name: Log in to Docker Hub
+      #   run: |
+      #     echo "${{ secrets.DOCKER_PASSWORD }}" | helm registry login registry-1.docker.io --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      # - name: Package Helm Chart
+      #   run: |
+      #     helm package ./catgif
+
+      # - name: Push to Docker Hub
+      #   run: |
+      #     CHART_PACKAGE=$(ls charts-*.tgz)
+      #     helm push $CHART_PACKAGE oci://registry-1.docker.io/nimrod1/cat_gif_site_new_helm
+
+    #monitorng
+
+      - name: Debug Kubernetes Connection
+        run: kubectl get nodes
+
+      - name: Add Prometheus Helm Repository
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Install Prometheus and Grafana
+        run: |
+          helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
+            -f catgif/values_prometheus.yaml \
+            --namespace monitoring --create-namespace \
+            --set grafana.service.type=LoadBalancer
+
+# kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 9090:9090
+# kubectl port-forward -n monitoring svc/monitoring-grafana 3000:80
+
+# kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090
+# kubectl port-forward svc/monitoring-grafana 3000:80
+
+# http://localhost:9090/targets
+# http://localhost:3000
+
+# admin 
+# prom-operator
+
+      - name: Add Grafana Helm Repository
+        run: |
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo update
+
+      - name: Install Loki
+        run: |
+          helm upgrade --install loki grafana/loki-stack \
+            --namespace monitoring --create-namespace \
+            -f catgif/values_loki.yaml
+
+
+      - name: Configure Loki in Grafana
+        run: kubectl apply -f catgif/loki-datasource.yaml
+
+
+      - name: Restart Grafana to Apply Config
+        run: kubectl rollout restart deployment/monitoring-grafana -n monitoring

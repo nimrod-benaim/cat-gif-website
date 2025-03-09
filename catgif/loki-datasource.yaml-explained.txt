@@ -1,0 +1,25 @@
+# File: catgif/loki-datasource.yaml
+
+# Specify the API version for the Kubernetes object.
+apiVersion: v1  
+# Define the type of Kubernetes object; here, it's a ConfigMap.
+kind: ConfigMap  
+# Metadata provides information about the ConfigMap.
+metadata:
+  # The name of the ConfigMap.
+  name: loki-datasource  
+  # The namespace where this ConfigMap will be deployed.
+  namespace: monitoring  
+# Data section holds key-value pairs; here, we define a configuration file for a Loki datasource.
+data:
+  # The key is the name of the file (loki-datasource.yaml) that Grafana will use to configure the datasource.
+  loki-datasource.yaml: |
+    # API version for the datasource configuration format (specific to Grafana).
+    apiVersion: 1
+    # Start of the list of datasources.
+    datasources:
+    - name: Loki            # The name to display for this datasource in Grafana.
+      type: loki            # The type of datasource; here, it's set to Loki.
+      access: proxy         # Access mode; "proxy" means requests are sent via Grafana's backend.
+      url: http://loki:3100  # URL pointing to the Loki service within the cluster.
+      isDefault: true       # Marks this datasource as the default one in Grafana.

@@ -1,0 +1,65 @@
+# -----------------------------
+# MySQL Deployment configuration
+# -----------------------------
+apiVersion: apps/v1                  # Using the apps/v1 API for Deployments
+kind: Deployment                     # Declares a Deployment resource to manage MySQL pods
+metadata:
+  name: {{ .Release.Name }}-mysql    # Name of the Deployment; dynamically generated using the Helm release name with "-mysql" appended
+spec:
+  replicas: {{ .Values.mysql.replicaCount }}  # Number of MySQL pod replicas, defined in values.yaml
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mysql          # Selector to identify pods managed by this Deployment (must match pod labels)
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mysql        # Label applied to pods so that the Deployment can select them
+    spec:
+      containers:
+      - name: mysql                           # Container name for the MySQL instance
+        image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"  # Docker image for MySQL, constructed from repository and tag values in values.yaml
+        ports:
+        - containerPort: 3306                   # Exposes port 3306 inside the container for MySQL
+        env:
+        - name: MYSQL_ROOT_PASSWORD            # Environment variable for MySQL root password
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-app-secrets  # References the Secret that contains MYSQL_ROOT_PASSWORD
+              key: MYSQL_ROOT_PASSWORD        # Key in the Secret for the root password
+        - name: MYSQL_DATABASE                 # Environment variable specifying the name of the database to create/use
+          value: "{{ .Values.database.name }}" # Directly set from values.yaml
+        - name: MYSQL_USER                     # Environment variable for MySQL username
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-app-secrets  # References the Secret for the database user
+              key: DATABASE_USER              # Key in the Secret for the database user
+        - name: MYSQL_PASSWORD                 # Environment variable for MySQL user password
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-app-secrets  # References the Secret for the database password
+              key: DATABASE_PASSWORD          # Key in the Secret for the database password
+        volumeMounts:
+        - name: mysql-data                     # Mount a volume for persistent MySQL data
+          mountPath: /var/lib/mysql            # MySQL stores its data in /var/lib/mysql
+        - name: init-sql                       # Mount a volume for the initialization SQL scripts
+          mountPath: /docker-entrypoint-initdb.d  # MySQL initialization directory; scripts here run on container startup
+      volumes:
+      - name: mysql-data                     # Define the volume for MySQL data
+        emptyDir: {}                         # Use an emptyDir volume (non-persistent); consider using a PersistentVolumeClaim for production
+      - name: init-sql                       # Define the volume for the initialization SQL scripts
+        configMap:
+          name: {{ .Release.Name }}-init-sql-configmap  # References the ConfigMap that contains the init.sql script
+
+# -----------------------------
+# MySQL Service configuration
+# -----------------------------
+---
+apiVersion: v1                     # Using the core v1 API for Services
+kind: Service                      # Declares a Service resource to expose the MySQL Deployment
+metadata:
+  name: {{ .Release.Name }}-mysql  # Name of the Service; generated using the Helm release name with "-mysql" appended
+spec:
+  ports:
+  - port: 3306                     # The port that the Service exposes (external port)
+  selector:
+    app: {{ .Release.Name }}-mysql  # Selector to target pods with this label (should match the Deployment's pod labels)

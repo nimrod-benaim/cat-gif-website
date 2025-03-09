@@ -1,0 +1,151 @@
+# Default values for the catgif Helm chart.
+# This file declares variables that are passed into your Helm templates.
+
+# Set the number of pod replicas for the application.
+replicaCount: 1  # Number of replicas for the application deployment
+
+# Container image configuration.
+image:
+  repository: nimrod1/cat_gif_site_new  # Docker image repository from which to pull the application image
+  pullPolicy: IfNotPresent  # Image pull policy: pull only if the image isn't already present locally
+  tag: IMAGE_VERSION_PLACEHOLDER  # Image tag; this placeholder is replaced dynamically (e.g., by CI/CD)
+
+# Configuration for pulling images from a private registry (if needed).
+imagePullSecrets: []  # List of secrets for accessing private Docker registries (empty by default)
+
+# Overrides for the chart and release naming.
+nameOverride: ""  # Optional override for the chart name; empty means no override
+fullnameOverride: catgif-app  # Full name to use for the deployed application
+
+# Service account configuration for Kubernetes.
+serviceAccount:
+  create: true  # Whether to create a new service account for the application
+  automount: true  # Automatically mount API credentials for the service account in pods
+  annotations: {}  # Additional annotations to add to the service account (none by default)
+  name: ""  # Service account name; if empty, one is generated based on the chart's fullname
+
+# Pod metadata: annotations and labels.
+podAnnotations: {}  # Additional annotations to attach to the pods (none by default)
+podLabels: {}       # Additional labels to attach to the pods (none by default)
+
+# Pod-level security context.
+podSecurityContext: {}  
+  # Example (commented out):
+  # fsGroup: 2000  # Set a specific file system group for volume permissions
+
+# Container-level security context.
+securityContext: {}  
+  # Examples (all commented out):
+  # capabilities:
+  #   drop:
+  #   - ALL  # Drop all Linux capabilities for improved security
+  # readOnlyRootFilesystem: true  # Set the container's root filesystem as read-only
+  # runAsNonRoot: true  # Ensure the container does not run as the root user
+  # runAsUser: 1000  # Specify a non-root user ID for the container
+
+# Service configuration for exposing the application.
+service:
+  type: LoadBalancer  # Service type; LoadBalancer provisions an external load balancer
+  port: 80            # Port on which the service is exposed externally
+  targetPort: 5000    # Port on which the application is running inside the container
+
+# MySQL deployment configuration for the application.
+mysql:
+  replicaCount: 1  # Number of MySQL replicas to deploy
+  image:
+    repository: mysql  # Docker image repository for MySQL
+    tag: "8.0"         # MySQL image version
+
+# Database connection and seeding configuration.
+database:
+  host: catgif-mysql      # Hostname of the MySQL database (usually the service name in Kubernetes)
+  port: 3306              # Port on which MySQL is listening
+  name: catgif_db         # Name of the database to use
+  user: catgif_user       # Username for connecting to the database
+  password: catgif_password  # Password for the database user
+  rootPassword: yourpassword  # Root password for MySQL (should be secured in production)
+  seedData:               # Initial data (list of image URLs) to seed the database
+    - "https://th.bing.com/th/id/R.69bc0dd23ecbc52186c9f8226db663f6?rik=%2fkEH7eUmt7QsUQ&pid=ImgRaw&r=0"
+    - "https://th.bing.com/th/id/R.2ac93011db01822e89a9b98bfb94b119?rik=39LlswP7qM2GAQ&pid=ImgRaw&r=0"
+    - "https://media.tenor.com/nV-ot7JwmmoAAAAM/you-so-funny.gif"
+    - "https://www.gifcen.com/wp-content/uploads/2022/04/pop-cat-gif-9.gif"
+    - "https://media.tenor.com/97sD3prHJcoAAAAC/funny-memes.gif"
+    - "https://www.gifcen.com/wp-content/uploads/2021/06/meme-gif-9.gif"
+    - "https://media.tenor.com/NmjGWE3U1-8AAAAd/cat.gif"
+    - "https://media1.tenor.com/images/dd6f569c7da8fda9b0586c6080be8574/tenor.gif?itemid=16310120"
+    - "https://media.tenor.com/o9owbF_iALAAAAAC/sad-cat.gif"
+    - "https://media.tenor.com/i8A6KxLGQZEAAAAC/cute-cat.gif"
+    - "https://c.tenor.com/yOzaaX7UQw8AAAAd/cat-cute.gif"
+    - "https://i.pinimg.com/originals/e2/7e/5e/e27e5e9c64d69ccd201528c0444e626e.gif"
+    - "https://i.pinimg.com/originals/9f/5d/31/9f5d31768d5db6ec657c17be58355a9e.gif"
+    - "https://i.pinimg.com/originals/84/0b/b4/840bb47b86b03cb98610a3862ade4972.gif"
+    - "https://cdn.stickers.gg/stickers/4209-mocha-cat-5.gif"
+    - "https://cdn.stickers.gg/stickers/5973-mocha-cat-8.gif"
+    - "https://media.tenor.com/LLLRvDwzXuMAAAAC/bongo-cat-cat-meme.gif"
+    - "https://3.bp.blogspot.com/-7mdL3BahEYg/VkzN5T46pGI/AAAAAAABgr4/jOID7NXkdGE/s1600/funny-cat-gifs-181-09.gif"
+    - "https://newfastuff.com/wp-content/uploads/2019/06/2BCzMVE.png"
+    - "https://media1.tenor.com/images/dee2f9f29572393e39e886ffab9c18ec/tenor.gif?itemid=11663195"
+    - "https://media.tenor.com/4yEuW6bbRo0AAAAi/gato.gif"
+    - "https://www.drodd.com/images10/funny-cat-gifs17.gif"
+
+# Ingress configuration for exposing the application via HTTP(S).
+ingress:
+  enabled: false       # Enable or disable Ingress; false means Ingress is disabled by default
+  className: ""        # Optional ingress class name; leave empty if not required
+  annotations: {}      # Additional annotations for the Ingress resource (none by default)
+    # Example annotations (commented out):
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local  # Hostname for the Ingress rule
+      paths:
+        - path: /  # Route all traffic at the root path
+          pathType: ImplementationSpecific  # Use implementation-specific path matching
+  tls: []  # TLS settings for secure connections; empty by default
+  # Example TLS configuration (commented out):
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# Resource requests and limits for application pods.
+resources: {}  
+  # By default, no CPU or memory limits/requests are specified.
+  # Uncomment and set values if resource constraints are desired.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Autoscaling configuration for the application deployment.
+autoscaling:
+  enabled: false                           # Whether Horizontal Pod Autoscaling is enabled
+  minReplicas: 1                           # Minimum number of pod replicas when autoscaling
+  maxReplicas: 100                         # Maximum number of pod replicas when autoscaling
+  targetCPUUtilizationPercentage: 80       # Target CPU utilization percentage to trigger scaling
+  # targetMemoryUtilizationPercentage: 80   # Optional: target memory utilization percentage
+
+# Additional volumes to be added to the pod's deployment.
+volumes: []  
+# Example of defining a volume (commented out):
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volume mounts for the pods.
+volumeMounts: []  
+# Example of defining a volume mount (commented out):
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+# Node selector for scheduling pods on specific nodes.
+nodeSelector: {}  # Specify key-value pairs to constrain which nodes can run the pods
+
+# Tolerations to allow pods to schedule onto tainted nodes.
+tolerations: []  # List of tolerations (empty by default)
+
+# Affinity rules for pod scheduling.
+affinity: {}  # Define affinity and anti-affinity rules to influence pod placement

@@ -1,0 +1,23 @@
+# Specify the API version for the ServiceMonitor resource provided by the Prometheus Operator.
+apiVersion: monitoring.coreos.com/v1  
+# Define the kind of resource; here, it is a ServiceMonitor used by Prometheus to monitor services.
+kind: ServiceMonitor  
+metadata:
+  # Name of the ServiceMonitor.
+  name: flask-app-monitor  
+  labels:
+    # Label used to associate this ServiceMonitor with the Prometheus release.
+    # Ensure this label matches the release label configured in your Prometheus deployment.
+    release: monitoring  
+spec:
+  # Selector to choose which services this monitor should target.
+  selector:
+    matchLabels:
+      # Only services with this label will be monitored.
+      # This label should match the label on the Service defined for the catgif application.
+      app: catgif-catgif  
+  # Endpoints define how Prometheus will access the metrics.
+  endpoints:
+    - port: http       # The name of the port on the Service that serves metrics.
+      path: /metrics   # The HTTP path where metrics are exposed.
+      interval: 15s    # The frequency at which Prometheus will scrape metrics from this endpoint.
